@@ -17,7 +17,7 @@ If you are interested in a complete hospital system, [send me an email](mailto:n
 
 
 ## Installation:
-1. Download the latest installer for windows from the releases page at https://github.com/abiiranathan/hmis/releases/tag/v1.0.0
+1. Download the latest installer for windows from the releases page at https://github.com/abiiranathan/hmis/releases
    
 2. Clone the repository and build you own installer.
    

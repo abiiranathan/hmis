@@ -30,8 +30,11 @@ set(PROJECT_SOURCES
         register.ui
         register.h
         register.cpp
+        database.h
+        database.cpp
         Icon.rc
 )
+
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -40,22 +43,12 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(HMIS
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        ${WIN32_RESOURCES}
-    )
-
+    qt_add_executable(HMIS MANUAL_FINALIZATION ${PROJECT_SOURCES} ${WIN32_RESOURCES})
 else()
     if(ANDROID)
-        add_library(HMIS SHARED
-            ${PROJECT_SOURCES}
-        )
+        add_library(HMIS SHARED ${PROJECT_SOURCES})
     else()
-        add_executable(HMIS WIN32
-            ${PROJECT_SOURCES}
-            ${WIN32_RESOURCES}
-        )
+        add_executable(HMIS WIN32 ${PROJECT_SOURCES} ${WIN32_RESOURCES})
     endif()
 endif()
 

@@ -1,13 +1,12 @@
 #ifndef DIAGNOSIS_H
 #define DIAGNOSIS_H
-#include <QString>
 #include <QList>
+#include <QString>
 
-class Diagnosis
-{
-public:
-    Diagnosis();
-    QList<QString> getAllDiagnoses();
+class Diagnosis {
+ public:
+  Diagnosis();
+  QList<QString> getAllDiagnoses();
 };
 
-#endif // DIAGNOSIS_H
+#endif  // DIAGNOSIS_H

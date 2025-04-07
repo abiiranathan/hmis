@@ -1,0 +1,43 @@
+name: Qt6 Windows Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.2'   # Replace with your required Qt version
+          host: 'windows'
+          target: 'desktop'
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%Qt6_DIR%"
+
+      - name: Build Project
+        run: cmake --build build --config Release
+
+      - name: Deploy Application (windeployqt)
+        run: |
+          windeployqt --dir build\release\deploy build\release\MyApp.exe
+
+      - name: Create Installer with NSIS (Optional)
+        run: |
+          makensis myinstaller.nsi
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: myapp-installer
+          path: build/release/deploy/

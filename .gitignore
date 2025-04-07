@@ -1,0 +1,6 @@
+CMakeLists.txt.user
+.env
+*.sqlite3
+build
+*.log
+.cache

@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>diagnoses.txt</file>
+        <file>favicon.ico</file>
+        <file>icons/close-window.png</file>
+        <file>icons/open-book.png</file>
+        <file>icons/toggle-off.png</file>
+        <file>icons/toggle-on.png</file>
+        <file>icons/theme.png</file>
+    </qresource>
+</RCC>

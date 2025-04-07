@@ -1,0 +1,279 @@
+Suspected Malaria
+Malaria Confirmed
+Acute Flaccid Paralysis
+Animal bites(Suspected Rabies)
+Cholera
+Dysentery
+Guinea worm
+Measles
+Bacterial Meningitis
+Neonatal tetanus
+Plague
+Yellow Fever
+Other Viral Haemorrhagic Fevers
+Severe Acute Respiratory Infection (SARI)
+Adverse Events Following Immunization (AEFI) - Serious
+Adverse Events Following Immunization (AEFI) - Non Serious
+Typhoid Fever
+Presumptive MDR TB cases
+Other Emerging infectious Diseases
+Diarrhea - Acute
+Diarrhea - Persistent
+Urethral discharges
+Genital ulcers
+Sexually Transimted Infection due to SGBV
+Other Sexually Transmitted Infections
+Urinary Tract Infections (UTI)
+UTI in Pregnancy
+Malaria in Pregnancy
+Intestinal Worms
+Haematological Meningitis
+Other types of meningitis
+Cough or cold - No pneumonia
+Pneumonia
+Severe pneumonia
+Skin Diseases
+Tetanus (over 28 days)
+Sleeping sickness
+Pelvic Inflammatory Disease (PID)
+Brucellosis
+Neonatal sepsis(0-7 days)
+Neonatal sepsis(8-28 days)
+Neonatal pneumonia(0-7 days)
+Neonatal pneumonia(8-28 days)
+Neonatal meningitis
+Neonatal jaundice
+Premature baby(as a Condition for management)
+Other neonatal conditions
+Sickle Cell Anaemia
+Other types of anaemia
+Gastro-intestinal disorders(non-infective)
+Pain requiring palliative age
+Dental Caries
+Gingivitis
+HIV Oral lesions
+Oral cancers
+Other oral conditions
+Otitis media - acute and chronic
+Mastoiditis
+Hearing loss
+Rhinitis
+Sinusitis
+Epistaxis
+Adenoid hypertrophy
+Foreign body in nose ear and aero-digestive system
+Infected pre-auricular sinuses and abscess
+Otitis externa
+Mastoid abscess
+Vertigo
+Tonsilitis
+Tonsillar hypertrophy
+Tinnitus
+Head and neck cancers
+Other ENT conditions
+Allergic conjuctivitis
+Bacterial conjuctivitis
+Opthalmia neonatorum
+Other forms of conjuctivitis
+Corneal Ulcers/Keratitis
+Unoperable cataract(>6/60)
+Operable cataract(<6/60)
+Refractive errors
+Glaucoma
+Trachoma
+Vitamin A Deficiency
+Ocular trauma and burns
+Diabetic retinopathy(All stages)
+Chorioretinal Macular & Vitreous Disorders
+Uveitis
+Endophthalmitis
+Corneal scars(Non trachomatous)
+Ocular Tumors
+Strabismus(All types)
+Ptosis and other lid disorders
+Squamous cell carcinoma of conjuctiva
+Retinoblastoma
+Other malignant tumors of the eye
+Other benign tumors/growth of the eye
+Other eye disorders
+Blindness
+Spectacles dispensed
+Anxiety disorders
+Anxiety disorders due to GBV
+Unipolar Depressive Disorder
+Bipolar disorder
+Schizophrenia
+Post-Traumatic stress disorder
+Epilepsy
+HIV related psychosis
+Alzheimer's disease
+HIV related dementia
+Alcohol related dementia
+Dementia due to stroke(Diabetes Hypertension)
+Other forms of dementia
+Internet addiction
+Alcohol use disorder
+Substance(drug) use disorder
+Delirium
+Intellectual disability
+Autism spectrum disorders
+Aphasia due to stroke
+Dysarthria due to stroke
+Parkinson's disease
+Dementia
+Amyotrophic Lateral Sclerosis
+Speech disorders due to head injury
+Persons in coma/Emergency care
+Down's syndrome
+Cerebral Palsy(CP)
+Child abuse and neglect
+Attention deficit hyperactivity disorder(ADHD)
+Learning disability
+Conduct disorder
+Eating disorders(Bulimia anorexia nervosa etc)
+Somatoform disorders
+Sleeping disorders
+Enuresis/Encopresis
+Other childhood mental disorders
+Mental illness due to other medical or surgical condition
+Attempted suicide or self-harm
+Asthma
+Chronic obstructive pulmonary disease(COPD)
+Cervical cancer
+Prostate cancer
+Lung cancer
+Liver cancer
+Colon cancer
+Breast cancer
+Kaposis Sarcoma
+Other cancers
+Muscular disorders
+Joint dysfunction
+Soft tissue injuries
+Chronic respiratory diseases
+Chest trauma or injury
+Paralysis due to spinal cord injury and other diseases
+Cerebral palsy or delayed milestones
+Upper motor neuron lesions(UMN)
+Facial palsy
+Lower motor neuron lesions(LMN)
+Gynaecological obstetric and urogenital conditions
+Amputee
+Altered posture and gait
+Injection neuritis
+Congenital abnormalities
+Spine disorders
+Lymphoedema
+Patients prescribed assistive devices - PT
+Neurodevelopmental disorders
+Sensory integration disorders
+Adult neurological disorders
+Burn injuries
+Post-burn contractures
+Orthopaedic conditions
+Mental health conditions
+Birth defects and trauma
+Arthrogryposis(Arthrogryposis multiplex congenita)
+HIV/AIDS in Occupational therapy
+Diabetes in Occupational therapy
+Cancer in Occupational therapy
+Cardiac conditions in Occupational therapy
+Patient prescribed assistive devices - OT
+Speech and language delay/disorder
+Motor speech disorders
+Hearing impairments
+Voice disorders
+Dysfluency/stammering
+Acquired neurological disorders
+Cleft lip and palate
+Individuals with difficulty in seeing
+Individuals with Albinism
+Individuals with difficulty in hearing
+Individuals with speech difficulties
+Individuals with delayed age-specific motor development
+Individuals with dwarfism
+Individuals with difficulty understanding
+Individuals with difficulty in remembering
+Individuals with difficulty in reading
+Individuals with difficulty in writing
+Individuals with difficulty in self-care
+Individuals with mental impairment
+Individuals with emotional impairment
+Stroke/CVA
+Hypertension
+Heart failure
+Ischaemic Heart Diseases
+Rheumatic Heart Diseases
+Chronic Heart Diseases
+Other Cardiovascular diseases
+Diabetes mellitus
+Thyroid Disease
+Other endocrine and metabolic diseases
+Jaw injuries
+Road traffic injuries - Motor vehicle
+Road traffic injuries - Motor cycle
+Road traffic injuries - Motor bicycles
+Road traffic injuries - Other
+Injuries due to GBV
+Injuries/trauma - Other causes
+Animal bites - Domestic
+Animal bites - Wild
+Snake bites
+Insect bites
+Tooth extractions
+Dental fillings
+Other minor operations in OPD
+Leishmaniasis
+Lymphatic filariasis(hydrocele)
+Lymphatic filariasis(Lymphoedema)
+Urinary Schistosomiasis
+Intestinal Schistosomiasis
+Onchocerciasis
+Abortions due to GBV
+Abortions due to Other causes
+Number of postabortion women who receive FP
+High blood pressure in pregnancy
+Obstructed labour
+Puerperal sepsis
+Haemorrhage related to pregnancy(APH)
+Haemorrhage related to pregnancy(PPH)
+Breast cancer screening
+Breast cancer screened and positive
+Cervical cancer screened
+Cervical cancer screened and positive
+Deaths in OPD
+Alcohol use
+Tobacco use
+Tobacco exposure
+Peptic Ulcer Disease
+Antenatal Care
+Immunization
+Obstetric Scan
+Abdominal Scan
+Postnatal care
+Septicaemia
+Atopic Dermatitis
+Allergic Cough
+Acute Gastroenteritis
+Severe Acute Malnutrition(SAM)
+Cholecystitis
+Medical Checkup
+Menorrhagia
+Normal Pregnancy
+Pulmonary Tuberculosis (PTB)
+Extra-Pulmonary TB
+Normal Labour
+Incomplete Abortion
+Complete Abortion
+Pharyngitis
+Bronchiolitis
+Onychomycosis
+Vaginal Candidiasis
+Lumbago
+Migraine
+Superficial masses
+BPH
+Arthritis
+Circumcission
+Family Planning
+Threatened Abortion

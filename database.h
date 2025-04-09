@@ -27,7 +27,7 @@ typedef struct NewHMISData {
 // Encapsulates all the database related logic like connection to db,
 // creating tables, executing queries, fetching data.
 class Database {
- private:
+private:
   const QString dxSeparator = "____";
 
   // Instance of the database
@@ -36,7 +36,7 @@ class Database {
   // Create the tables. If an error occurs, returns false.
   bool createSchema();
 
- public:
+public:
   // Default constructor
   Database();
 
@@ -65,6 +65,9 @@ class Database {
 
   // Latest Ip Number
   QString nextIPNumber(int year, int month);
+
+  // Update hmis row
+  bool updateHMISRow(int rowId, const HMISRow &data);
 };
 
-#endif  // DATABASE_H
+#endif // DATABASE_H

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1038</width>
-    <height>739</height>
+    <width>829</width>
+    <height>662</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,7 +24,19 @@
        <enum>QFrame::Shadow::Raised</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0" rowspan="4">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item row="0" column="0" rowspan="5">
         <widget class="QFrame" name="sidebar">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -34,7 +46,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>400</width>
+           <width>300</width>
            <height>0</height>
           </size>
          </property>
@@ -229,7 +241,7 @@
             <item>
              <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>Select one or more diagnoses.</string>
+               <string>Select one or more diagnoses. Double click to add</string>
               </property>
              </widget>
             </item>
@@ -293,6 +305,30 @@
          </layout>
         </widget>
        </item>
+       <item row="4" column="1">
+        <widget class="QTableWidget" name="tableDiagnoses"/>
+       </item>
+       <item row="2" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>HMIS DIAGNOSES FOR SELECTED MONTH</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkHideEmpty">
+           <property name="text">
+            <string>HIDE EMPTY ROWS</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item row="0" column="1">
         <widget class="QLabel" name="label_2">
          <property name="text">
@@ -310,16 +346,6 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Diagnoses for this month</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QTableWidget" name="tableDiagnoses"/>
-       </item>
       </layout>
      </widget>
     </item>
@@ -331,8 +357,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1038</width>
-     <height>27</height>
+     <width>829</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHMIS">
@@ -370,8 +396,8 @@
    </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>16</width>
+     <height>16</height>
     </size>
    </property>
    <property name="toolButtonStyle">

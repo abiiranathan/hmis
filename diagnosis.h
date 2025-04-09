@@ -4,9 +4,10 @@
 #include <QString>
 
 class Diagnosis {
- public:
+public:
   Diagnosis();
   QList<QString> getAllDiagnoses();
+  void appendDiagnoses(QStringList &missing);
 };
 
-#endif  // DIAGNOSIS_H
+#endif // DIAGNOSIS_H

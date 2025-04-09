@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>diagnoses.txt</file>
         <file>favicon.ico</file>
         <file>icons/close-window.png</file>
         <file>icons/open-book.png</file>

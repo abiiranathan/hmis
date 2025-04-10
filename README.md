@@ -29,10 +29,6 @@ Your HMIS data is stored in your home folder with database name hmis.sqlite3. e.
 `C:\Users\username\hmis.sqlite3`. 
 You can customize this with an environment variable HMIS_DB.
 
-> If you are updating from tag v1, your database is in the same location as your main binary.
-> ** First copy your database *db.sqlite3* from `C:\ProgramFiles\HMIS\db.sqlite3` to another location before uninstalling the previous version.
-> After updating, go to Backup menu and restore the data to the new database.
-
 ## Known issues
 
 HMIS uses a sqlite3 database. When running HMIS on windows, you may get an `Error opening database`. This is because the application needs read and write permissions on the C:\ drive.
@@ -46,7 +42,6 @@ To solve this issue, right click on the Desktop Icon -> Properties -> Compatibil
 ### Futures am thinking about but not yet implemented.
 * Integrated HAART register and reports
 * Antenatal Register and reports
-* Support other database backends e.g postgres, mysql through environment variables.
 
 ---
 Feel free to submit pull requests and file bugs.

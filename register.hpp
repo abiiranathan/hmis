@@ -30,7 +30,7 @@ class Register : public QMainWindow {
 
 public:
     explicit Register(Database* db, int year, int month, QWidget* parent = nullptr);
-    ~Register();
+    ~Register() override;
 
     void setData(QList<HMISRow> const& data);
 

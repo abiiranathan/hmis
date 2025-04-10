@@ -88,7 +88,7 @@ class MainWindow : public QMainWindow {
 
 public:
     MainWindow(Database& conn, QWidget* parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
     // public members
     void filterDiagnoses(const QString& query);

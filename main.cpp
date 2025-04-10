@@ -5,12 +5,6 @@
 #include <QStandardPaths>
 #include "mainwindow.hpp"
 
-static const QString APP_NAME      = "HMIS 105";
-static const QString APP_VERSION   = "1.0.0";
-static const QString APP_AUTHOR    = "Dr. Abiira Nathan";
-static const QString APP_COPYRIGHT = "2023 Dr. Abiira Nathan";
-static const QString APP_LICENSE   = "MIT License";
-
 static QString SqlitePath(const QString& dbName) {
     // create in home directory
     QString homeDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
@@ -18,12 +12,7 @@ static QString SqlitePath(const QString& dbName) {
     return dbPath;
 }
 
-int main(int argc, char* argv[]) {
-    QApplication app(argc, argv);
-    Q_INIT_RESOURCE(Resources);
-    app.setStyle("Fusion");
-
-    // Create light theme palette
+static void setPallete(QApplication& app) {
     QPalette palette;
     palette.setColor(QPalette::Window, QColor(240, 240, 240));
     palette.setColor(QPalette::WindowText, Qt::black);
@@ -38,6 +27,25 @@ int main(int argc, char* argv[]) {
     palette.setColor(QPalette::Highlight, QColor(0, 120, 215));
     palette.setColor(QPalette::HighlightedText, Qt::white);
     app.setPalette(palette);
+}
+
+int main(int argc, char* argv[]) {
+    QApplication app(argc, argv);
+    app.setApplicationName("HMIS");
+    app.setApplicationVersion("1.0.0");
+    app.setOrganizationName("Yo Medical Files (U) Limited");
+    app.setOrganizationDomain("yomedicalfiles.com");
+    app.setApplicationDisplayName("HMIS");
+    app.setQuitOnLastWindowClosed(true);
+
+    // Initialize resources
+    Q_INIT_RESOURCE(Resources);
+
+    // Set application style
+    app.setStyle("Fusion");
+
+    // Set application palette
+    setPallete(app);
 
     // Create connection options
     // You can change the database options here
@@ -48,13 +56,13 @@ int main(int argc, char* argv[]) {
     if (!db.Connect(connOptions)) {
         QMessageBox::critical(
             nullptr,
-            APP_NAME,
+            "HMIS",
             "Unable to connect to the database. Please check your connection settings." + db.getLastError());
         return EXIT_FAILURE;
     }
 
     if (!db.createSchema()) {
-        QMessageBox::critical(nullptr, APP_NAME, "Unable to create database schema." + db.getLastError());
+        QMessageBox::critical(nullptr, "HMIS", "Unable to create database schema." + db.getLastError());
         return EXIT_FAILURE;
     }
 

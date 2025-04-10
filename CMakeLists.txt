@@ -7,6 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,21 +21,18 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets Sql REQUIRED)
 set(PROJECT_SOURCES
     main.cpp
     mainwindow.cpp
-    mainwindow.h
+    mainwindow.hpp
     mainwindow.ui
-    diagnosis.h
-    diagnosis.cpp
-    HMISRow.h
+    HMISRow.hpp
     Resources.qrc
     diagnoses.txt
     register.ui
-    register.h
+    register.hpp
     register.cpp
-    database.h
+    database.hpp
     database.cpp
     Icon.rc
 )
-
 
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")

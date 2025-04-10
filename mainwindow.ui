@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>829</width>
-    <height>662</height>
+    <width>1158</width>
+    <height>723</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,7 +46,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>300</width>
+           <width>450</width>
            <height>0</height>
           </size>
          </property>
@@ -236,12 +236,17 @@
                 <height>120</height>
                </size>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>Select one or more diagnoses. Double click to add</string>
+               <string>Select one or more diagnoses.</string>
               </property>
              </widget>
             </item>
@@ -253,7 +258,13 @@
              </widget>
             </item>
             <item>
-             <widget class="QListWidget" name="listWidgetAllDiagnoses"/>
+             <widget class="QListWidget" name="listWidgetAllDiagnoses">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -306,12 +317,21 @@
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QTableWidget" name="tableDiagnoses"/>
+        <widget class="QTableWidget" name="tableDiagnoses">
+         <property name="font">
+          <font>
+           <pointsize>13</pointsize>
+          </font>
+         </property>
+        </widget>
        </item>
        <item row="2" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="leftMargin">
+          <number>4</number>
+         </property>
          <property name="topMargin">
-          <number>0</number>
+          <number>4</number>
          </property>
          <item>
           <widget class="QLabel" name="label">
@@ -321,9 +341,36 @@
           </widget>
          </item>
          <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QCheckBox" name="checkHideEmpty">
            <property name="text">
             <string>HIDE EMPTY ROWS</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>FILTER</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtFilter">
+           <property name="placeholderText">
+            <string>Filter by diagnosis</string>
            </property>
           </widget>
          </item>
@@ -357,8 +404,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>829</width>
-     <height>22</height>
+     <width>1158</width>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHMIS">
@@ -367,18 +414,17 @@
     </property>
     <addaction name="actionView_Register"/>
     <addaction name="actionExpand"/>
-    <addaction name="actionToggle_Style"/>
     <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuBackup">
+   <widget class="QMenu" name="menuDiagnoses">
     <property name="title">
-     <string>Backup</string>
+     <string>Diagnoses</string>
     </property>
-    <addaction name="actionRestore"/>
-    <addaction name="actionBackup"/>
+    <addaction name="actionView_All_Diagnoses"/>
+    <addaction name="actionRegister_New_Diagnosis"/>
    </widget>
    <addaction name="menuHMIS"/>
-   <addaction name="menuBackup"/>
+   <addaction name="menuDiagnoses"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="font">
@@ -412,8 +458,10 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionExpand"/>
    <addaction name="actionView_Register"/>
+   <addaction name="actionView_All_Diagnoses"/>
+   <addaction name="actionRegister_New_Diagnosis"/>
+   <addaction name="actionExpand"/>
    <addaction name="actionExit"/>
   </widget>
   <action name="actionExpand">
@@ -449,24 +497,6 @@
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="actionToggle_Style">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="Resources.qrc">
-     <normaloff>:/icons/theme.png</normaloff>:/icons/theme.png</iconset>
-   </property>
-   <property name="text">
-    <string>Switch Theme</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+T</string>
-   </property>
-  </action>
   <action name="actionExit">
    <property name="icon">
     <iconset resource="Resources.qrc">
@@ -479,14 +509,23 @@
     <string>Ctrl+W</string>
    </property>
   </action>
-  <action name="actionRestore">
+  <action name="actionView_All_Diagnoses">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::FormatJustifyFill"/>
+   </property>
    <property name="text">
-    <string>Restore data from backup</string>
+    <string>View Diagnoses</string>
+   </property>
+   <property name="toolTip">
+    <string>View All Diagnoses</string>
    </property>
   </action>
-  <action name="actionBackup">
+  <action name="actionRegister_New_Diagnosis">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::ContactNew"/>
+   </property>
    <property name="text">
-    <string>Create a database backup</string>
+    <string>Register New Diagnosis</string>
    </property>
   </action>
  </widget>

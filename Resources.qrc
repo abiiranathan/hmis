@@ -6,5 +6,6 @@
         <file>icons/toggle-off.png</file>
         <file>icons/toggle-on.png</file>
         <file>icons/theme.png</file>
+        <file>diagnoses.txt</file>
     </qresource>
 </RCC>

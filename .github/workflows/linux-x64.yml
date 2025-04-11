@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # # Changed from ubuntu-latest to match glibc 2.31 
 
     steps:
       - name: Checkout Repository
@@ -69,7 +69,8 @@ jobs:
             libxcb-randr0-dev \
             libxcb-render-util0-dev \
             libxkbcommon-dev \
-            libxkbcommon-x11-dev
+            libxkbcommon-x11-dev \
+            libfuse2
 
       - name: Configure CMake
         run: |

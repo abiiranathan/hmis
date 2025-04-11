@@ -104,7 +104,10 @@ jobs:
             -qmake="$Qt6_DIR/bin/qmake" \
             -appimage \
             -extra-plugins=iconengines,platformthemes \
-            -no-translations
+            -no-translations \
+            -unsupported-allow-new-glibc \
+            -exclude-libs=libqsqlmimer
+
           mv HMIS*.AppImage build/release/deploy/HMIS-${{ steps.version.outputs.version }}-Linux-x64.AppImage
 
       - name: Create Tarball

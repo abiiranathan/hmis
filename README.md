@@ -10,14 +10,15 @@ It is not a complete hospital management system.
 If you are interested in a complete hospital system, [send me an email](mailto:nabiira2by2@gmail.com).
 
 ## Features
-- Register Patients
-- Auto-generate HMIS 105 report for attendances and diagnoses
-- Backups and restore
-- View patient register with custom search by Ip Number or diagnosis.
-
+- [x] Register Patients with Serial No, Sex, Age range and one or more diagnoses.
+- [x] Auto-generate HMIS 105 report for attendances and diagnoses
+- [x] View stored report depending on the selected month.
+- [x] Register new diagnoses (even those not on standard HMIS 105 forms)
+- [x] Use **sqlite3**, **mysql** or **postgresql** databases.
+- [x] Ready to use Installer for the Windows x64.
 
 ## Installation:
-1. Download the latest installer for windows from the releases page at https://github.com/abiiranathan/hmis/releases/tag/v1.0.0
+1. Download the latest installer for windows from the releases page at https://github.com/abiiranathan/hmis/releases/tag/v2.0.0
    
 2. Clone the repository and build you own installer.
    
@@ -25,25 +26,49 @@ See [QtInstaller Project](https://github.com/abiiranathan/qtinstaller) and learn
 ---
 
 ## Database configuration
-Your HMIS data is stored in your home folder with database name hmis.sqlite3. e.g 
-`C:\Users\username\hmis.sqlite3`. 
-You can customize this with an environment variable HMIS_DB.
+HMIS supports 3 database drivers.
 
-## Known issues
+### Configuring sqlite3
 
-HMIS uses a sqlite3 database. When running HMIS on windows, you may get an `Error opening database`. This is because the application needs read and write permissions on the C:\ drive.
+sqlite3 is the default driver. A database called **hmis.sqlite3** will be created in the HOME directory. The name is not customizable.
 
-To solve this issue, right click on the Desktop Icon -> Properties -> Compatibility tab -> Check Run this program as an Administrator.
+### Configuring Postgres database
+You need to set environment variables for the driver and postgres connection options.
 
- This enables HMIS to run as Administrator persistently. The longer option is to manually change permissions from the Security Tab under Properties.
+On windows, you set the environment variables in settings.
+Below are variables to be set.
+```txt
+PGDATABASE=hmis            # The database name to connect to
+PGUSER=postgres_user       # replace with connecting user      
+PGPASSWORD=password        # replace with password of user
+PGHOST=127.0.1             # This is the default and can be skipped.
+PGPORT=5432                # This is the default and can be skipped.
+HMIS_DB_DRIVER=postgresql  # MUST be set for us to use postgres.
+```
 
+### Configuring mysql database
+You need to set environment variables for the driver and mysql connection options.
+
+On windows, you set the environment variables in settings.
+Below are variables to be set.
+```txt
+MYSQL_DATABASE=hmis       # The database name to connect to.
+MYSQL_HOST=postgres_user  # replace with connecting user      
+MYSQL_USER=password       # replace with password of user
+MYSQL_PASSWORD=127.0.1    # This is the default and can be skipped.
+MYSQL_PORT=3306           # This is the default and can be skipped.
+HMIS_DB_DRIVER=mysql      # MUST be set for us to use mysql.
+```
 
 ---
-### Futures am thinking about but not yet implemented.
-* Integrated HAART register and reports
-* Antenatal Register and reports
+### Features to be implemented.
+* Charts for attendence statistics, diagnoses.
+* Integrated HAART register and reports.
+* Antenatal register and reports.
+* User authentication.
 
 ---
+
 Feel free to submit pull requests and file bugs.
 
 <center style="display: flex; gap: 1rem;">

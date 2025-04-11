@@ -9,13 +9,13 @@ Database::Database() = default;
 
 bool Database::Connect(const ConnOptions& options) {
     if (!options.isValid()) {
-        qWarning() << "Invalid connection options provided.";
+        QMessageBox::critical(nullptr, "Connect to database", "Invalid connection options provided");
         return false;
     }
 
     const QString driverName = options.getDriverName();
     if (!QSqlDatabase::isDriverAvailable(driverName)) {
-        qWarning() << "Driver" << driverName << "is not available.";
+        QMessageBox::critical(nullptr, "Connect to database", "Unsupported driver: " + driverName);
         return false;
     }
 
@@ -43,47 +43,62 @@ bool Database::Connect(const ConnOptions& options) {
             db.setPassword(mysqlOptions.getPassword());
         } break;
         default:
-            qWarning() << "Unsupported database driver.";
+            QMessageBox::critical(nullptr, "Connect to database", "Unsupported driver: " + driverName);
             return false;
     }
 
     bool ok = db.open();
     if (!ok) {
-        qWarning() << "Database connection failed:" << db.lastError().text();
+        QMessageBox::critical(nullptr, "Connect to database", "Database connection failed: " + db.lastError().text());
         return false;
     }
 
-    qDebug() << "Database connection established successfully with driver" << driverName << "at" << db.databaseName();
-    qDebug() << "Database connection name:" << db.connectionName();
+    this->connOptions = options;
     return true;
 }
 
 bool Database::createSchema() {
-    const QString hmis_schema =
-        "CREATE TABLE IF NOT EXISTS hmis ("
-        "id integer NOT NULL PRIMARY KEY AUTOINCREMENT, "
-        "age_category TEXT NOT NULL,"
-        "month int NOT NULL, "
-        "year int NOT NULL, "
-        "sex TEXT CHECK(sex IN ('Male', 'Female')) NOT NULL, "
-        "new_attendance TEXT CHECK(new_attendance IN ('YES', 'NO')) NOT NULL "
-        "DEFAULT 'YES', diagnosis TEXT DEFAULT '', ip_number varchar(100) NOT NULL, UNIQUE(ip_number, year, month))";
+    if (!db.isOpen()) {
+        QMessageBox::critical(nullptr, "Database", "Database connection is not valid");
+        return false;
+    }
 
-    QSqlQuery query(hmis_schema);
-    if (!query.exec()) {
-        qDebug() << "Error executing HMIS schema: " + query.lastError().text() + "\n";
+    // Based on the driver, create the schema with the appropriate primary key syntax
+    Driver driver = connOptions.getDriver();
+    QString primaryKeyDef;
+
+    if (driver == Driver::SQLITE) {
+        primaryKeyDef = "id integer NOT NULL PRIMARY KEY AUTOINCREMENT";
+    } else if (driver == Driver::POSTGRES) {
+        primaryKeyDef = "id SERIAL PRIMARY KEY";
+    } else if (driver == Driver::MYSQL) {
+        primaryKeyDef = "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY";
+    } else {
+        QMessageBox::critical(nullptr, "Database", "Unsupported database driver");
+        return false;
+    }
+
+    QString queryString =
+        "CREATE TABLE IF NOT EXISTS hmis (" + primaryKeyDef + ", " + "age_category TEXT NOT NULL," +
+        "month int NOT NULL, " + "year int NOT NULL, " + "sex TEXT CHECK(sex IN ('Male', 'Female')) NOT NULL, " +
+        "new_attendance TEXT CHECK(new_attendance IN ('YES', 'NO')) NOT NULL " +
+        "DEFAULT 'YES', diagnosis TEXT DEFAULT '', ip_number varchar(100) NOT NULL, UNIQUE(ip_number,year,month))";
+
+    QSqlQuery query;
+    if (!query.exec(queryString)) {
+        QMessageBox::critical(nullptr, "Create HMIS Schema", query.lastError().text());
         return false;
     }
 
     // Create a table for diagnoses
-    query = QSqlQuery(
-        "CREATE TABLE IF NOT EXISTS diagnoses(id integer NOT NULL PRIMARY KEY AUTOINCREMENT,name TEXT NOT NULL "
-        "UNIQUE)");
+    QString diagnosisQuery =
+        "CREATE TABLE IF NOT EXISTS diagnoses(" + primaryKeyDef + "," + "name TEXT NOT NULL UNIQUE)";
 
-    if (!query.exec()) {
-        qDebug() << "Error executing diagnosis schema: " + query.lastError().text() + "\n";
+    if (!query.exec(diagnosisQuery)) {
+        QMessageBox::critical(nullptr, "Create HMIS Diagnosis Schema", query.lastError().text());
         return false;
     }
+
     return true;
 }
 
@@ -212,13 +227,11 @@ bool Database::updateHMISRow(const HMISRow& data) {
 
 // Returns all diagnoses registered in the system.
 std::optional<QList<Diagnosis>> Database::getAllDiagnoses() {
-    static auto QUERY = QStringLiteral("SELECT id, name FROM diagnoses");
     QList<Diagnosis> list;
-    QSqlQuery query(QUERY);
-
-    if (!query.exec()) {
+    QSqlQuery query;
+    if (!query.exec("SELECT id, name FROM diagnoses")) {
         qWarning() << "Failed to execute getAllDiagnoses query:" << query.lastError();
-        return std::nullopt;  // Indicates failure
+        return std::nullopt;
     }
 
     list.reserve(query.size());
@@ -235,9 +248,7 @@ bool Database::insertDiagnoses(const QStringList& diagnoses) {
         return true;
     }
 
-    static const auto QUERY = QStringLiteral("INSERT INTO diagnoses(name) VALUES(:name)");
-    QSqlQuery query(db);
-
+    QSqlQuery query;
     // Start transaction with RAII-like scope
     struct TransactionGuard {
         QSqlDatabase& db;
@@ -263,7 +274,7 @@ bool Database::insertDiagnoses(const QStringList& diagnoses) {
         return false;
     }
 
-    if (!query.prepare(QUERY)) {
+    if (!query.prepare("INSERT INTO diagnoses(name) VALUES(:name)")) {
         qWarning() << "Failed to prepare insert diagnoses query:" << query.lastError();
         return false;
     }

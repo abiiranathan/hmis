@@ -4,3 +4,4 @@ CMakeLists.txt.user
 build
 *.log
 .cache
+*.env.*

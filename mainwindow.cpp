@@ -357,10 +357,24 @@ void MainWindow::populateAttendances(int year, int month) {
 
 void MainWindow::setAttendenceTableItem(int row, int column, int number) {
     ui->tableAttendances->setItem(row, column, new QTableWidgetItem(QString::number(number)));
+
+    // If number is > 0, make bold
+    if (number > 0) {
+        QTableWidgetItem* item = ui->tableAttendances->item(row, column);
+        if (item != nullptr) {
+            item->setFont(QFont("Arial", 12, QFont::Bold));
+        }
+    }
 }
 
 void MainWindow::setDiagnosisTableItem(int row, int column, int number) {
     ui->tableDiagnoses->setItem(row, column, new QTableWidgetItem(QString::number(number)));
+    if (number > 0) {
+        QTableWidgetItem* item = ui->tableDiagnoses->item(row, column);
+        if (item != nullptr) {
+            item->setFont(QFont("Arial", 12, QFont::Bold));
+        }
+    }
 }
 
 void MainWindow::populateDiagnoses(int year, int month) {

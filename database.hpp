@@ -184,7 +184,7 @@ public:
             case Driver::MYSQL:
                 return m_mysqlOptions.getConnectionString();
         }
-        return QString();
+        return {};
     }
     [[nodiscard]] const SqliteOptions& getSqliteOptions() const {
         return m_sqliteOptions;
@@ -242,6 +242,7 @@ private:
 
     // Instance of the database
     QSqlDatabase db;
+    ConnOptions connOptions;
 
 public:
     // Default constructor

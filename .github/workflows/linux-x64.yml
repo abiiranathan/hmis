@@ -85,14 +85,12 @@ jobs:
         run: |
             mkdir -p build/release/deploy
 
-      - name: Copy Executable to Release Directory
+      - name: Copy Executable and Desktop Files
         run: |
-          if [ ! -f build/HMIS ]; then
-            echo "HMIS not found in build/"
-            find build -name HMIS
-            exit 1
-          fi
           cp build/HMIS build/release/
+          cp HMIS.desktop build/release/
+          cp favicon.ico build/release/
+          cp logo.png build/release/HMIS.png
 
       - name: Deploy Application (linuxdeployqt)
         run: |
@@ -105,7 +103,6 @@ jobs:
             -appimage \
             -extra-plugins=iconengines,platformthemes \
             -no-translations \
-            -unsupported-allow-new-glibc \
             -exclude-libs=libqsqlmimer
 
           mv HMIS*.AppImage build/release/deploy/HMIS-${{ steps.version.outputs.version }}-Linux-x64.AppImage
@@ -126,3 +123,4 @@ jobs:
             build/release/deploy/HMIS_${{ steps.version.outputs.version }}_Linux_x64.tar.gz
           draft: false
           prerelease: false
+

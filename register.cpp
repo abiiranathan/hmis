@@ -200,7 +200,7 @@ void Register::itemChanged(QTableWidgetItem* item) {
         }
 
         // Add diagnoses to file if they don't exit
-        const HMISRow& hmisRow = {
+        const HMISRow hmisRow = {
             .id            = rowData[0].toInt(),
             .ageCategory   = rowData[2],
             .sex           = rowData[3],

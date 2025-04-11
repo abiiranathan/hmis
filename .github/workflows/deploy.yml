@@ -80,9 +80,18 @@ jobs:
 
       - name: Create Installer with NSIS
         run: |
+          # Copy NSIS script and required files
           Copy-Item -Path installer.nsi -Destination build/release/deploy/
+          Copy-Item -Path favicon.ico -Destination build/release/deploy/
+          Copy-Item -Path logo.png -Destination build/release/deploy/
+          # Conditionally copy LICENSE.txt if it exists
+          $licenseExists = Test-Path LICENSE.txt
+          if ($licenseExists) {
+            Copy-Item -Path LICENSE.txt -Destination build/release/deploy/
+          }
           Set-Location build/release/deploy
-          makensis installer.nsi
+          # Run makensis with version and optional EXIST_LICENSE
+          makensis /DVERSION=${{ steps.version.outputs.version }} $(if ($licenseExists) { "/DEXIST_LICENSE" }) installer.nsi
           if (-not (Test-Path HMIS_Installer.exe)) {
             Write-Error "NSIS installer creation failed"
             exit 1

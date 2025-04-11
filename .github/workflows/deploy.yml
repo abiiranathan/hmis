@@ -31,12 +31,12 @@ jobs:
         shell: pwsh
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           version: '6.7.0'
           host: 'windows'
           target: 'desktop'
-          arch: 'x86_64'
+          cache: true
 
       - name: Setup MSVC Environment
         uses: ilammy/msvc-dev-cmd@v1
@@ -45,7 +45,7 @@ jobs:
 
       - name: Install NSIS
         run: |
-          choco install nsis --version=3.09 -y
+          choco install nsis --version=3.11 -y
         shell: pwsh
 
       - name: Configure CMake

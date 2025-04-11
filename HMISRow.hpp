@@ -14,8 +14,6 @@ public:
     QString ipNumber;       // IP Number
     int year;               // Year
     int month;              // Month
-
-    QString toString();
 };
 
 #endif  // HMISROW_H

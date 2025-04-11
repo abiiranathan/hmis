@@ -2,9 +2,8 @@ name: Qt6 Linux Build and Release
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    tags:
+      - 'v*'
 
 jobs:
   build:

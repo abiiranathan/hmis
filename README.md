@@ -15,15 +15,24 @@ If you are interested in a complete hospital system, [send me an email](mailto:n
 - [x] View stored report depending on the selected month.
 - [x] Register new diagnoses (even those not on standard HMIS 105 forms)
 - [x] Use **sqlite3**, **mysql** or **postgresql** databases.
-- [x] Ready to use Installer for the Windows x64.
+- [x] Ready to use Installers for the Windows x64 and Linux x64 app image.
 
 ## Installation:
-1. Download the latest installer for windows from the releases page at https://github.com/abiiranathan/hmis/releases/tag/v2.0.0
+1. Download the latest installer for windows from the releases page at https://github.com/abiiranathan/hmis/releases or the linux archive that contains the .AppImage.
+
+#Dependencies
+The Linux App image requires libfuse to run.
+Install with:
+
+```bash
+sudo apt install libfuse2
+```
+
+On archlinux, install with:
+```bash
+sudo pacman -S fuse2
+```
    
-2. Clone the repository and build you own installer.
-   
-See [QtInstaller Project](https://github.com/abiiranathan/qtinstaller) and learn how to create windows installers for Qt applications with ease.
----
 
 ## Database configuration
 HMIS supports 3 database drivers.

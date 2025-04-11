@@ -66,6 +66,7 @@ jobs:
             libxcb-sync-dev \
             libxcb-xfixes0-dev \
             libxcb-shape0-dev \
+            libxcb-cursor-dev \
             libxcb-randr0-dev \
             libxcb-render-util0-dev \
             libxkbcommon-dev \
@@ -80,6 +81,10 @@ jobs:
         run: |
           cmake --build build --config Release --parallel
 
+      - name: Create Deployment Directory
+        run: |
+            mkdir -p build/release/deploy
+
       - name: Copy Executable to Release Directory
         run: |
           if [ ! -f build/HMIS ]; then
@@ -88,10 +93,6 @@ jobs:
             exit 1
           fi
           cp build/HMIS build/release/
-
-      - name: Create Deployment Directory
-        run: |
-          mkdir -p build/release/deploy
 
       - name: Deploy Application (linuxdeployqt)
         run: |
@@ -122,4 +123,3 @@ jobs:
             build/release/deploy/HMIS_${{ steps.version.outputs.version }}_Linux_x64.tar.gz
           draft: false
           prerelease: false
-          

@@ -9,11 +9,23 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Use C++20 for designated initializers on Windows
+# Use C++20 (or C++2a fallback) for designated initializers
 if(MSVC)
     add_compile_options(/std:c++20)
 else()
-    add_compile_options(-std=c++20)
+    # Check GCC or Clang version
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # GCC 10+ and Clang 10+ support -std=c++20
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
+            add_compile_options(-std=c++20)
+        else()
+            # Older versions use -std=c++2a (C++20 draft)
+            add_compile_options(-std=c++2a)
+        endif()
+    else()
+        # Default to -std=c++20 for other compilers (e.g., newer GCC/Clang)
+        add_compile_options(-std=c++20)
+    endif()
 endif()
 
 # Set the C++ standard to C++20

@@ -80,9 +80,9 @@ jobs:
 
       - name: Create Installer with NSIS
         run: |
-          Copy-Item -Path installer.nsi -Destination build/release/deploy/
+          Copy-Item -Path myinstaller.nsi -Destination build/release/deploy/
           Set-Location build/release/deploy
-          makensis installer.nsi
+          makensis myinstaller.nsi
           if (-not (Test-Path HMIS_Installer.exe)) {
             Write-Error "NSIS installer creation failed"
             exit 1

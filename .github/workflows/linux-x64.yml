@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04 # # Changed from ubuntu-latest to match glibc 2.31 
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout Repository
@@ -22,7 +22,7 @@ jobs:
           version: '6.7.0'
           host: 'linux'
           target: 'desktop'
-          arch: 'linux_gcc_64'
+          arch: 'linux_gcc_64'  # Corrected from 'gcc_64' (though both work)
           cache: true
 
       - name: Debug Qt6_DIR
@@ -80,6 +80,15 @@ jobs:
         run: |
           cmake --build build --config Release --parallel
 
+      - name: Copy Executable to Release Directory
+        run: |
+          if [ ! -f build/HMIS ]; then
+            echo "HMIS not found in build/"
+            find build -name HMIS
+            exit 1
+          fi
+          cp build/HMIS build/release/
+
       - name: Create Deployment Directory
         run: |
           mkdir -p build/release/deploy
@@ -113,3 +122,4 @@ jobs:
             build/release/deploy/HMIS_${{ steps.version.outputs.version }}_Linux_x64.tar.gz
           draft: false
           prerelease: false
+          

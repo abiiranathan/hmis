@@ -17,27 +17,64 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '6.5.2'   # Replace with your required Qt version
+          version: '6.7.0'
           host: 'windows'
           target: 'desktop'
+          # modules: 'qtwebengine qtpositioning qtmultimedia qtsql'
+          # setup-python: 'true'
+
+      - name: Setup MSVC Environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install NSIS
+        run: |
+          choco install nsis -y
 
       - name: Configure CMake
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%Qt6_DIR%"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH="$env:Qt6_DIR"
 
       - name: Build Project
-        run: cmake --build build --config Release
+        run: |
+          cmake --build build --config Release
+
+      - name: Create Deployment Directory
+        run: |
+          mkdir -p build/release/deploy
+        shell: bash
 
       - name: Deploy Application (windeployqt)
         run: |
-          windeployqt --dir build\release\deploy build\release\MyApp.exe
+          $env:PATH += ";$env:Qt6_DIR\bin"
+          windeployqt --dir build\release\deploy --release build\release\HMIS.exe
+        shell: pwsh
 
-      - name: Create Installer with NSIS (Optional)
+      - name: Copy Extra DLLs (if needed)
         run: |
-          makensis myinstaller.nsi
+          # Copy any additional DLLs your application needs
+          # cp path/to/additional.dll build/release/deploy/
+        shell: bash
 
-      - name: Upload Artifact
+      - name: Create Installer with NSIS
+        run: |
+          if (Test-Path -Path "myinstaller.nsi") {
+            makensis myinstaller.nsi
+          } else {
+            Write-Host "NSIS script not found, skipping installer creation"
+          }
+        shell: pwsh
+
+      - name: Upload Binary Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: myapp-installer
+          name: hmis-windows-binaries
           path: build/release/deploy/
+
+      - name: Upload Installer Artifact
+        if: success() && hashFiles('*.exe')
+        uses: actions/upload-artifact@v4
+        with:
+          name: hmis-windows-installer
+          path: |
+            *.exe
+            !build/release/HMIS.exe

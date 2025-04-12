@@ -33,8 +33,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets Sql REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets Sql REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets Sql Charts REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets Sql Charts REQUIRED)
 
 set(PROJECT_SOURCES
     main.cpp
@@ -49,6 +49,7 @@ set(PROJECT_SOURCES
     register.cpp
     database.hpp
     database.cpp
+    charts.hpp
     Icon.rc
 )
 
@@ -68,7 +69,12 @@ else()
     endif()
 endif()
 
-target_link_libraries(HMIS PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql)
+target_link_libraries(HMIS PRIVATE 
+    Qt${QT_VERSION_MAJOR}::Core 
+    Qt${QT_VERSION_MAJOR}::Widgets 
+    Qt${QT_VERSION_MAJOR}::Sql
+    Qt${QT_VERSION_MAJOR}::Charts
+)
 
 set_target_properties(HMIS PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER com.yomedicalfiles.hmis

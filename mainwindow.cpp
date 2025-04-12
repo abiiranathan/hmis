@@ -454,14 +454,28 @@ void MainWindow::onExit() {
 
 void MainWindow::onViewRegister() {
     QDate date = ui->dateEdit->date();
+    int year   = date.year();
+    int month  = date.month();
 
-    int year  = date.year();
-    int month = date.month();
+    HMISData rows = db.fetchHMISData(year, month);
 
     auto* registerDialog = new Register(&db, year, month, this);
 
-    registerDialog->setData(db.fetchHMISData(year, month));
+    registerDialog->setData(rows);
     registerDialog->showMaximized();
+
+    // Show plots
+    auto dxMap         = diagnosisStats;
+    auto attendanceMap = attendanceStats;
+
+    for (HMISRow& row : rows) {
+        for (QString& dx : row.diagnoses) {
+            dxMap[dx][row.ageCategory][row.sex]++;
+        }
+        attendanceMap[row.newAttendance][row.ageCategory][row.sex]++;
+    }
+
+    registerDialog->plotData(dxMap, attendanceMap);
 }
 
 void MainWindow::diagnosisQueryChanged(const QString& query) {

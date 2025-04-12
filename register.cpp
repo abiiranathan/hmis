@@ -1,9 +1,11 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QTableView>
+#include <algorithm>
 
 #include "./ui_register.h"
 
+#include "charts.hpp"
 #include "register.hpp"
 
 Register::Register(Database* db, int year, int month, QWidget* parent)
@@ -49,17 +51,131 @@ void Register::disableIDColumn() {
     }
 }
 
+static QVector<QPair<QString, int>> getSortedDiagnosisTotals(const StatsMap& dxMap, const QStringList& ageCategories) {
+    QVector<QPair<QString, int>> diagnosisTotals;
+    for (const auto& dxKey : dxMap.keys()) {
+        int totalCount = 0;
+        for (const auto& category : ageCategories) {
+            for (const Sex& sex : {MALE, FEMALE}) {
+                if (dxMap[dxKey].contains(category) && dxMap[dxKey][category].contains(sex)) {
+                    totalCount += dxMap[dxKey][category][sex];
+                }
+            }
+        }
+        diagnosisTotals.append({dxKey, totalCount});
+    }
+
+    std::ranges::sort(diagnosisTotals,
+                      [](const QPair<QString, int>& a, const QPair<QString, int>& b) { return a.second > b.second; });
+
+    return diagnosisTotals;
+}
+
+static QList<AbstractChart*> createDiagnosisCharts(const StatsMap& dxMap, const QStringList& ageCategories,
+                                                   const QVector<QPair<QString, int>>& diagnosisTotals) {
+    QList<AbstractChart*> charts;
+    int diagnosisCount = 0;
+
+    for (const auto& dxPair : diagnosisTotals) {
+        const QString& dxKey = dxPair.first;
+        if (dxKey.isEmpty() || diagnosisCount >= 10) {
+            continue;
+        }
+
+        auto* dxChart = new BarChart(dxKey, ageCategories);
+        bool allZero  = true;
+
+        for (const Sex& sex : {MALE, FEMALE}) {
+            std::vector<qreal> vecData;
+            for (const auto& category : ageCategories) {
+                vecData.push_back(dxMap[dxKey].value(category).value(sex, 0));
+            }
+
+            if (!std::ranges::all_of(vecData, [](qreal val) { return val == 0.0; })) {
+                allZero = false;
+                dxChart->addSeries(sex, vecData, (sex == MALE) ? QColor(Qt::blue) : QColor(Qt::red));
+                dxChart->setYRange(0, *std::ranges::max_element(vecData) * 1.2);
+            }
+        }
+
+        if (!allZero) {
+            charts.append(dxChart);
+            diagnosisCount++;
+        } else {
+            delete dxChart;
+        }
+    }
+
+    return charts;
+}
+
+static QList<AbstractChart*> createAttendanceCharts(const StatsMap& attendanceMap, const QStringList& ageCategories) {
+    QList<AbstractChart*> charts;
+
+    for (const auto& key : attendanceMap.keys()) {
+        auto* chart = new BarChart(key == YES ? "NEW ATTENDANCE" : "RE-ATTENDANCE", ageCategories);
+
+        for (const Sex& sex : {MALE, FEMALE}) {
+            std::vector<qreal> vecData;
+            for (const auto& category : ageCategories) {
+                vecData.push_back(attendanceMap[key].value(category).value(sex, 0));
+            }
+
+            chart->addSeries(sex, vecData, (sex == MALE) ? QColor(Qt::blue) : QColor(Qt::red));
+            chart->setYRange(0, *std::ranges::max_element(vecData) * 1.2);
+        }
+
+        charts.append(chart);
+    }
+
+    return charts;
+}
+
+static void layoutCharts(Ui::Register* ui, const QList<AbstractChart*>& dxCharts,
+                         const QList<AbstractChart*>& attendanceCharts) {
+    auto* mainLayout = new QVBoxLayout();
+
+    mainLayout->addWidget(new QLabel("Attendance Charts"));
+    auto* attendanceLayout = new QVBoxLayout();
+    for (auto* chart : attendanceCharts) {
+        auto* w = chart->widget();
+        w->setMinimumSize(300, 400);
+        attendanceLayout->addWidget(w);
+    }
+    mainLayout->addLayout(attendanceLayout);
+
+    mainLayout->addWidget(new QLabel("Diagnosis Charts"));
+    auto* diagnosisLayout = new QVBoxLayout();
+    for (auto* chart : dxCharts) {
+        auto* w = chart->widget();
+        w->setMinimumSize(300, 400);
+        diagnosisLayout->addWidget(w);
+    }
+    mainLayout->addLayout(diagnosisLayout);
+
+    ui->chartLayout->addLayout(mainLayout, 0, 0);
+}
+
 void Register::setData(const QList<HMISRow>& tableData) {
     this->data         = tableData;
     this->filteredData = tableData;
 
     buildTableWidget();
     populateTableWithData();
+}
 
-    // TODO: Display a chart in ui->chartLayout (a QGridLayout)
-    // TODO: Implement chart display
-    // TODO: Accept aggregated chart data as a parameter.
-    // This is because the data is already aggregate in mainWindow.cpp
+void Register::plotData(const StatsMap& dxMap, const StatsMap& attendanceMap) {
+    QStringList ageCategories = {ZERO_TO_TWENTY_EIGHT_DAYS,
+                                 TWENTY_NINE_DAYS_TO_FOUR_YEARS,
+                                 FIVE_TO_NINE_YEARS,
+                                 TEN_TO_NINETEEN_YEARS,
+                                 TWENTY_YEARS_AND_ABOVE};
+
+    auto diagnosisTotals  = getSortedDiagnosisTotals(dxMap, ageCategories);
+    auto diagnosisCharts  = createDiagnosisCharts(dxMap, ageCategories, diagnosisTotals);
+    auto attendanceCharts = createAttendanceCharts(attendanceMap, ageCategories);
+
+    layoutCharts(ui, diagnosisCharts, attendanceCharts);
 }
 
 void Register::onSearchTypeChanged(int /*unused*/) {

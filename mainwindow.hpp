@@ -10,21 +10,7 @@
 #include <QtSql/QSqlQuery>
 
 #include "database.hpp"
-
-using Sex        = QString;
-const Sex MALE   = QString("Male");
-const Sex FEMALE = QString("Female");
-
-// Age categories
-const QString ZERO_TO_TWENTY_EIGHT_DAYS      = "0 - 28 days";
-const QString TWENTY_NINE_DAYS_TO_FOUR_YEARS = "29 days - 4 years";
-const QString FIVE_TO_NINE_YEARS             = "5 - 9 years";
-const QString TEN_TO_NINETEEN_YEARS          = "10 - 19 years";
-const QString TWENTY_YEARS_AND_ABOVE         = "20 years and above";
-
-// Attendance statuses
-const QString YES = "YES";
-const QString NO  = "NO";
+#include "register.hpp"
 
 const QStringList diagnosisTableHeaders = {
     "0 - 28d(M)",
@@ -38,17 +24,6 @@ const QStringList diagnosisTableHeaders = {
     ">=20yrs(M)",
     ">=20yrs(F)",
 };
-
-// QMap storing counts for different sexes
-using SexMap = QMap<Sex, int>;
-
-using AgeCategoryMap = QMap<QString, SexMap>;
-
-// map[attendance_status][category][sex]
-using AttendanceMap = QMap<QString, QMap<QString, SexMap>>;
-
-// map[diagnosis][category][sex]
-using DiagnosisMap = QMap<QString, QMap<QString, SexMap>>;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -71,10 +46,10 @@ class MainWindow : public QMainWindow {
     int currentMonth;
 
     // Holds data for attandances
-    AttendanceMap attendanceStats;
+    StatsMap attendanceStats;
 
     // Holds data for diagnoses per month
-    DiagnosisMap diagnosisStats;
+    StatsMap diagnosisStats;
 
     void initializeTableWidget(QTableWidget* w, int rowCount);
     void populateAttendances(int year, int month);

@@ -23,6 +23,7 @@ jobs:
           target: 'desktop'
           arch: 'linux_gcc_64'  # Corrected from 'gcc_64' (though both work)
           cache: true
+          modules: 'qtcharts'
 
       - name: Debug Qt6_DIR
         run: |

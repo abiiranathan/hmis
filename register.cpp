@@ -2,7 +2,6 @@
 #include <QMessageBox>
 #include <QTableView>
 #include <algorithm>
-#include <ranges>
 
 #include "./ui_register.h"
 
@@ -66,8 +65,10 @@ static QVector<QPair<QString, int>> getSortedDiagnosisTotals(const StatsMap& dxM
         diagnosisTotals.append({dxKey, totalCount});
     }
 
-    std::ranges::sort(diagnosisTotals,
-                      [](const QPair<QString, int>& a, const QPair<QString, int>& b) { return a.second > b.second; });
+    std::sort(  // NOLINT
+        diagnosisTotals.begin(),
+        diagnosisTotals.end(),
+        [](const QPair<QString, int>& a, const QPair<QString, int>& b) { return a.second > b.second; });
 
     return diagnosisTotals;
 }
@@ -92,10 +93,10 @@ static QList<AbstractChart*> createDiagnosisCharts(const StatsMap& dxMap, const 
                 vecData.push_back(dxMap[dxKey].value(category).value(sex, 0));
             }
 
-            if (!std::ranges::all_of(vecData, [](qreal val) { return val == 0.0; })) {
+            if (!std::all_of(vecData.begin(), vecData.end(), [](qreal val) { return val == 0.0; })) {  // NOLINT
                 allZero = false;
                 dxChart->addSeries(sex, vecData, (sex == MALE) ? QColor(Qt::blue) : QColor(Qt::red));
-                dxChart->setYRange(0, *std::ranges::max_element(vecData) * 1.2);
+                dxChart->setYRange(0, *std::max_element(vecData.begin(), vecData.end()) * 1.2);  // NOLINT
             }
         }
 
@@ -123,7 +124,7 @@ static QList<AbstractChart*> createAttendanceCharts(const StatsMap& attendanceMa
             }
 
             chart->addSeries(sex, vecData, (sex == MALE) ? QColor(Qt::blue) : QColor(Qt::red));
-            chart->setYRange(0, *std::ranges::max_element(vecData) * 1.2);
+            chart->setYRange(0, *std::max_element(vecData.begin(), vecData.end()) * 1.2);  // NOLINT
         }
 
         charts.append(chart);

@@ -81,7 +81,9 @@ jobs:
           # Copy NSIS script and required files
           Copy-Item -Path installer.nsi -Destination build/release/deploy/
           Copy-Item -Path favicon.ico -Destination build/release/deploy/
-          Copy-Item -Path logo.png -Destination build/release/deploy/
+          Copy-Item -Path hmis_installer.bmp -Destination build/release/deploy/
+          Copy-Item -Path hmis_finish_page.bmp -Destination build/release/deploy/
+          
           # Conditionally copy LICENSE.txt if it exists
           $licenseExists = Test-Path LICENSE.txt
           if ($licenseExists) {

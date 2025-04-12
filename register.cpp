@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include <QTableView>
 #include <algorithm>
+#include <ranges>
 
 #include "./ui_register.h"
 

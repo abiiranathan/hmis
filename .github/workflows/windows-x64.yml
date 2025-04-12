@@ -98,7 +98,6 @@ jobs:
         shell: pwsh
 
       - name: Create Release and Upload Assets
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

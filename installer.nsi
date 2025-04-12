@@ -41,8 +41,8 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 !define MUI_UNICON "favicon.ico"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
-!define MUI_HEADERIMAGE_BITMAP "logo.png" ; Use logo.png as header image
-!define MUI_WELCOMEFINISHTITLEBITMAP "logo.png" ; Use logo.png for welcome/finish pages
+!define MUI_HEADERIMAGE_BITMAP "hmis_installer.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "hmis_finish_page.bmp"
 
 ;--------------------------------
 ; Pages

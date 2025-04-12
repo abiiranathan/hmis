@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 
-project(HMIS VERSION 2.1.6 LANGUAGES CXX)
+project(HMIS VERSION 2.1.7 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

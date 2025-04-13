@@ -12,6 +12,9 @@ enum class Driver : uint8_t { SQLITE, POSTGRES, MYSQL };
 struct SqliteOptions {
     QString dbName = "hmis.sqlite3";
 
+    SqliteOptions() = default;
+    SqliteOptions(QString name) : dbName(std::move(name)) {}
+
     [[nodiscard]] bool isValid() const {
         return !dbName.isEmpty();
     }

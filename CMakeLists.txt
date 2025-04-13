@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 
-project(HMIS VERSION 2.1.7 LANGUAGES CXX)
+project(HMIS VERSION 2.2.0 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -17,14 +17,14 @@ else()
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         # GCC 10+ and Clang 10+ support -std=c++20
         if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
-            add_compile_options(-std=c++20)
+            add_compile_options(-std=c++20 -fconcepts)
         else()
             # Older versions use -std=c++2a (C++20 draft)
-            add_compile_options(-std=c++2a)
+            add_compile_options(-std=c++2a -fconcepts)
         endif()
     else()
         # Default to -std=c++20 for other compilers (e.g., newer GCC/Clang)
-        add_compile_options(-std=c++20)
+        add_compile_options(-std=c++20 -fconcepts)
     endif()
 endif()
 

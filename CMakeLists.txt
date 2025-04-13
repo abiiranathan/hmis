@@ -47,6 +47,7 @@ set(PROJECT_SOURCES
     register.ui
     register.hpp
     register.cpp
+    databaseOptions.hpp
     database.hpp
     database.cpp
     charts.hpp

@@ -4,67 +4,59 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <exception>
+#include <utility>
 
 Database::Database() = default;
 
-bool Database::Connect(const ConnOptions& options) {
+void Database::Connect(const ConnOptions& options) {
     if (!options.isValid()) {
-        QMessageBox::critical(nullptr, "Connect to database", "Invalid connection options provided");
-        return false;
+        throw std::runtime_error("Invalid connection options");
     }
 
     const QString driverName = options.getDriverName();
     if (!QSqlDatabase::isDriverAvailable(driverName)) {
-        QMessageBox::critical(nullptr, "Connect to database", "Unsupported driver: " + driverName);
-        return false;
+        throw std::runtime_error("Unsupported driver: " + driverName.toStdString());
     }
 
-    // Set the database name and connection name
     db = QSqlDatabase::addDatabase(driverName);
 
     switch (options.getDriver()) {
         case Driver::SQLITE: {
-            db.setDatabaseName(options.getSqliteOptions().dbName);
-        } break;
+            const auto& opt = options.get<SqliteOptions>();
+            db.setDatabaseName(opt.dbName);
+            break;
+        }
         case Driver::POSTGRES: {
-            const PostgresOptions& postgresOptions = options.getPostgresOptions();
-            db.setHostName(postgresOptions.getHost());
-            db.setPort(postgresOptions.getPort());
-            db.setDatabaseName(postgresOptions.getDbName());
-            db.setUserName(postgresOptions.getUser());
-            db.setPassword(postgresOptions.getPassword());
-        } break;
+            const auto& opt = options.get<PostgresOptions>();
+            db.setHostName(opt.getHost());
+            db.setPort(opt.getPort());
+            db.setDatabaseName(opt.getDbName());
+            db.setUserName(opt.getUser());
+            db.setPassword(opt.getPassword());
+            break;
+        }
         case Driver::MYSQL: {
-            const MysqlOptions& mysqlOptions = options.getMysqlOptions();
-            db.setHostName(mysqlOptions.getHost());
-            db.setPort(mysqlOptions.getPort());
-            db.setDatabaseName(mysqlOptions.getDbName());
-            db.setUserName(mysqlOptions.getUser());
-            db.setPassword(mysqlOptions.getPassword());
-        } break;
-        default:
-            QMessageBox::critical(nullptr, "Connect to database", "Unsupported driver: " + driverName);
-            return false;
+            const auto& opt = options.get<MysqlOptions>();
+            db.setHostName(opt.getHost());
+            db.setPort(opt.getPort());
+            db.setDatabaseName(opt.getDbName());
+            db.setUserName(opt.getUser());
+            db.setPassword(opt.getPassword());
+            break;
+        }
     }
 
-    bool ok = db.open();
-    if (!ok) {
-        QMessageBox::critical(nullptr, "Connect to database", "Database connection failed: " + db.lastError().text());
-        return false;
+    if (!db.open()) {
+        throw std::runtime_error("Database connection failed: " + db.lastError().text().toStdString());
     }
 
-    this->connOptions = options;
-    return true;
+    m_connOptions = options;
 }
 
-bool Database::createSchema() {
-    if (!db.isOpen()) {
-        QMessageBox::critical(nullptr, "Database", "Database connection is not valid");
-        return false;
-    }
-
+void Database::createSchema() {
     // Based on the driver, create the schema with the appropriate primary key syntax
-    Driver driver = connOptions.getDriver();
+    Driver driver = m_connOptions.getDriver();
     QString primaryKeyDef;
 
     if (driver == Driver::SQLITE) {
@@ -74,8 +66,7 @@ bool Database::createSchema() {
     } else if (driver == Driver::MYSQL) {
         primaryKeyDef = "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY";
     } else {
-        QMessageBox::critical(nullptr, "Database", "Unsupported database driver");
-        return false;
+        throw std::runtime_error("Unsupported database driver");
     }
 
     QString queryString =
@@ -86,8 +77,7 @@ bool Database::createSchema() {
 
     QSqlQuery query;
     if (!query.exec(queryString)) {
-        QMessageBox::critical(nullptr, "Create HMIS Schema", query.lastError().text());
-        return false;
+        throw std::runtime_error("Error creating table: " + query.lastError().text().toStdString());
     }
 
     // Create a table for diagnoses
@@ -95,11 +85,8 @@ bool Database::createSchema() {
         "CREATE TABLE IF NOT EXISTS diagnoses(" + primaryKeyDef + "," + "name TEXT NOT NULL UNIQUE)";
 
     if (!query.exec(diagnosisQuery)) {
-        QMessageBox::critical(nullptr, "Create HMIS Diagnosis Schema", query.lastError().text());
-        return false;
+        throw std::runtime_error("Error creating table: " + query.lastError().text().toStdString());
     }
-
-    return true;
 }
 
 QString Database::getLastError() {

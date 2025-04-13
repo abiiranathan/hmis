@@ -11,7 +11,7 @@ static QString SqlitePath(const QString& dbName) {
     return dbPath;
 }
 
-static void loadPostgresOptions(ConnOptions& connOptions) {
+static PostgresOptions loadPostgresOptions() {
     QByteArray dbName   = qgetenv("PGDATABASE");
     QByteArray host     = qgetenv("PGHOST");
     QByteArray user     = qgetenv("PGUSER");
@@ -43,10 +43,10 @@ static void loadPostgresOptions(ConnOptions& connOptions) {
         throw std::runtime_error("PGPASSWORD environment variable is not set");
     }
 
-    connOptions.setPostgresOptions(PostgresOptions(dbName, user, password, host, portInt));
+    return {dbName, user, password, host, portInt};
 }
 
-static void loadMysqlOptions(ConnOptions& connOptions) {
+static MysqlOptions loadMysqlOptions() {
     QByteArray dbName   = qgetenv("MYSQL_DATABASE");
     QByteArray host     = qgetenv("MYSQL_HOST");
     QByteArray user     = qgetenv("MYSQL_USER");
@@ -78,28 +78,21 @@ static void loadMysqlOptions(ConnOptions& connOptions) {
         throw std::runtime_error("MYSQL_PASSWORD environment variable is not set");
     }
 
-    connOptions.setMysqlOptions(MysqlOptions(dbName, user, password, host, portInt));
+    return {dbName, user, password, host, portInt};
 }
 
-static void loadConnOptions(ConnOptions& connOptions) {
+static ConnOptions loadConnOptions() {
     const QByteArray driver = qgetenv("HMIS_DB_DRIVER");
     if (driver.isEmpty() || driver == "sqlite3") {
-        qDebug() << "Loading SQLite options";
-        connOptions.setSqliteOptions(SqliteOptions(SqlitePath("hmis.sqlite3")));
-        return;
+        return ConnOptions(SqliteOptions(SqlitePath("hmis.sqlite3")));
     }
-
     if (driver == "postgresql") {
-        qDebug() << "Loading PostgreSQL options";
-        loadPostgresOptions(connOptions);
-        return;
+        return ConnOptions(loadPostgresOptions());
     }
-
     if (driver == "mysql") {
-        qDebug() << "Loading MySQL options";
-        loadMysqlOptions(connOptions);
-        return;
+        return ConnOptions(loadMysqlOptions());
     }
+    throw std::runtime_error("Unknown driver");
 }
 
 static void setPallete(QApplication& app) {
@@ -138,24 +131,14 @@ int main(int argc, char* argv[]) {
     // Set application palette
     setPallete(app);
 
-    // Create connection options
-    // You can change the database options here
-    ConnOptions connOptions;
+    Database db;
 
     try {
         // Supported drivers: sqlite3, postgresql, mysql
-        loadConnOptions(connOptions);
-    } catch (std::runtime_error& e) {
-        QMessageBox::critical(nullptr, "Error loading database config", e.what());
-        return EXIT_FAILURE;
-    }
-
-    Database db;
-    if (!db.Connect(connOptions)) {
-        return EXIT_FAILURE;
-    }
-
-    if (!db.createSchema()) {
+        db.Connect(loadConnOptions());
+        db.createSchema();
+    } catch (const std::runtime_error& e) {
+        QMessageBox::critical(nullptr, "Database Connection", e.what());
         return EXIT_FAILURE;
     }
 

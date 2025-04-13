@@ -89,8 +89,8 @@ jobs:
         run: |
           cp build/HMIS build/release/
           cp HMIS.desktop build/release/
-          cp favicon.ico build/release/
-          cp logo.png build/release/HMIS.png
+          cp icons/favicon.ico build/release/
+          cp images/logo.png build/release/HMIS.png
 
       - name: Deploy Application (linuxdeployqt)
         run: |

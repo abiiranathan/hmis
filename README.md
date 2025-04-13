@@ -2,12 +2,13 @@
 
 Store patient records and generate a monthly HMIS 105 report for your medical facility.
 
-![HMIS Screenshot](./hmis.png)
+![HMIS Screenshot](./images/hmis.png)
+![HMIS Screenshot](./images/hmis_register.png)
 
 This software is meant to help you aggregate data for attendances and diagnoses only. 
 It is not a complete hospital management system.
 
-If you are interested in a complete hospital system, [send me an email](mailto:nabiira2by2@gmail.com).
+If you are interested in a complete hospital system, check out **[Eclinic HMS](https://abiiranathan.github.io/eclinichms)** and send me an email at **nabiira2by2@gmail.com**.
 
 ## Features
 - [x] Register Patients with Serial No, Sex, Age range and one or more diagnoses.
@@ -20,8 +21,9 @@ If you are interested in a complete hospital system, [send me an email](mailto:n
 ## Installation:
 1. Download the latest installer for windows from the releases page at https://github.com/abiiranathan/hmis/releases or the linux archive that contains the .AppImage.
 
-#Dependencies
+## Dependencies
 The Linux App image requires libfuse to run.
+
 Install with:
 
 ```bash
@@ -33,7 +35,6 @@ On archlinux, install with:
 sudo pacman -S fuse2
 ```
    
-
 ## Database configuration
 HMIS supports 3 database drivers.
 

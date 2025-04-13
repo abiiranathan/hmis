@@ -37,7 +37,7 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 ; Interface Settings
 
 !define MUI_ABORTWARNING
-!define MUI_ICON "favicon.ico" ; Use favicon.ico from build/release/deploy
+!define MUI_ICON "favicon.ico"
 !define MUI_UNICON "favicon.ico"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT

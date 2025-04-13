@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>favicon.ico</file>
+        <file>icons/favicon.ico</file>
         <file>icons/close-window.png</file>
         <file>icons/open-book.png</file>
         <file>icons/toggle-off.png</file>

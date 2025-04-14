@@ -23,13 +23,9 @@ MainWindow::MainWindow(Database& conn, QWidget* parent) : QMainWindow(parent), u
 
     // Set current date as last month
     // This will trigger data to be fetched
-    QDate date = QDate().currentDate().addMonths(-1);
+    QDate date = QDate().currentDate();
     ui->dateEdit->setDate(date);
     ui->dateEdit->setMaximumDate(QDate::currentDate());
-
-    // set next ip number
-    QString nextIP = db.nextIPNumber(date.year(), date.month());
-    ui->IPN->setText(nextIP);
 }
 
 // Destructor
@@ -437,6 +433,10 @@ void MainWindow::onDateChanged(const QDate& date) {
     currentMonth = date.month();
     populateAttendances(currentYear, currentMonth);
     populateDiagnoses(currentYear, currentMonth);
+
+    // Set the next IP for the current month
+    QString nextIP = db.nextIPNumber(date.year(), date.month());
+    ui->IPN->setText(nextIP);
 }
 
 void MainWindow::onToggleSidebar(bool toggled) {

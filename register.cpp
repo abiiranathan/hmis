@@ -397,7 +397,6 @@ void Register::deleteSelectedRow() {
     // Delete the row from the database
     if (m_db->deleteHMISRow(id)) {
         ui->tableWidget->removeRow(row);
-        QMessageBox::information(this, "Success", "Row deleted successfully");
     } else {
         QMessageBox::critical(this, "Error", "Unable to delete row: " + m_db->getLastError());
     }

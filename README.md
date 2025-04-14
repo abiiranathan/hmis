@@ -34,7 +34,11 @@ On archlinux, install with:
 ```bash
 sudo pacman -S fuse2
 ```
-   
+
+>On windows, you must install the C++ runtime DLLs from Microsoft.
+> Click here [https://aka.ms/vs/17/release/vc_redist.x64.exe](https://aka.ms/vs/17/release/vc_redist.x64.exe) to download it, then run it. It will install the requred dlls.
+
+
 ## Database configuration
 HMIS supports 3 database drivers.
 

@@ -1,557 +1,611 @@
-
 #include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QDialog>
 #include <QFileDialog>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QHeaderView>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSettings>
+#include <QVBoxLayout>
 
 #include "./ui_mainwindow.h"
 
+#include "AuditLogDialog.hpp"
 #include "mainwindow.hpp"
 #include "register.hpp"
 
-MainWindow::MainWindow(Database& conn, QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), db(conn) {
+// ---------------------------------------------------------------------------
+// Construction / destruction
+// ---------------------------------------------------------------------------
+MainWindow::MainWindow(Database& conn, const User& user, QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), db(conn), m_currentUser(user) {
     ui->setupUi(this);
     setWindowIcon(QIcon(":/favicon.ico"));
-    setWindowTitle("HMIS 105");
+    setWindowTitle(
+        QString("HMIS 105  —  %1 [%2]").arg(user.username).arg(user.role == UserRole::Admin ? "Admin" : "Clerk"));
     menuBar()->hide();
 
-    // Setup signals and slots
     connectSignals();
-
-    // Build the UI
     initUI();
 
-    // Set current date as last month
-    // This will trigger data to be fetched
-    QDate date = QDate().currentDate();
+    QDate date = QDate::currentDate();
     ui->dateEdit->setDate(date);
     ui->dateEdit->setMaximumDate(QDate::currentDate());
+
+    QSettings settings;
+    restoreGeometry(settings.value("mainwindow/geometry").toByteArray());
 }
 
-// Destructor
 MainWindow::~MainWindow() {
+    QSettings settings;
+    settings.setValue("mainwindow/geometry", saveGeometry());
     delete ui;
 }
 
-// Read default diagnosis names from resource file
+// ---------------------------------------------------------------------------
+// Default diagnoses from resource file
+// ---------------------------------------------------------------------------
 static QStringList readDefaultDiagnoses(QWidget* parent) {
     QFile file(":/diagnoses.txt");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::critical(parent, "Error", "Unable to open diagnoses file");
         return {};
     }
-
-    QStringList diagnoses;
+    QStringList out;
     while (!file.atEnd()) {
-        QByteArray line = file.readLine();
-        QString str     = QString::fromUtf8(line).trimmed();
-        if (!str.isEmpty()) {
-            diagnoses << str;
+        QString line = QString::fromUtf8(file.readLine()).trimmed();
+        if (!line.isEmpty()) {
+            out << line;
         }
     }
-    return diagnoses;
+    return out;
 }
 
+// ---------------------------------------------------------------------------
+// initUI
+// ---------------------------------------------------------------------------
 void MainWindow::initUI() {
-    // Populate all diagnoses
     auto storedDiagnoses = db.getAllDiagnoses();
     if (!storedDiagnoses) {
         QMessageBox::critical(this, "Error", "Unable to fetch diagnoses from the database");
         qApp->exit(1);
+        return;
     }
 
-    // Store diagnoses in a member variable
     diagnoses = storedDiagnoses.value();
     if (diagnoses.isEmpty()) {
-        // Insert default diagnoses
         if (!db.insertDiagnoses(readDefaultDiagnoses(this))) {
             QMessageBox::critical(this, "Error", "Unable to insert default diagnoses");
             qApp->exit(1);
+            return;
         }
-
-        // Re-fetch diagnoses from the database
         storedDiagnoses = db.getAllDiagnoses();
-        if (!storedDiagnoses) {
-            QMessageBox::critical(this, "Error", "Unable to fetch diagnoses from the database");
+        if (!storedDiagnoses || storedDiagnoses->isEmpty()) {
+            QMessageBox::critical(this, "Error", "No diagnoses found");
             qApp->exit(1);
+            return;
         }
-
-        // Store diagnoses in a member variable
         diagnoses = storedDiagnoses.value();
-        if (diagnoses.isEmpty()) {
-            QMessageBox::critical(this, "Error", "No diagnoses found in the database");
-            qApp->exit(1);
-        }
     }
 
-    // Populate the list widget with all diagnoses
-    ui->listWidgetAllDiagnoses->clear();
-
     diagnosisNames.clear();
-
-    // Populate the list widget with all diagnoses
     for (const Diagnosis& d : diagnoses) {
         diagnosisNames << d.name;
     }
 
+    ui->listWidgetAllDiagnoses->clear();
     ui->listWidgetAllDiagnoses->addItems(diagnosisNames);
-
-    // Initialize stats maps
-    SexMap sexMap;
-    sexMap.insert(MALE, 0);
-    sexMap.insert(FEMALE, 0);
-
-    // Initialize ageCategory map
-    AgeCategoryMap ageCategoryMap;
-    ageCategoryMap.insert(ZERO_TO_TWENTY_EIGHT_DAYS, sexMap);
-    ageCategoryMap.insert(TWENTY_NINE_DAYS_TO_FOUR_YEARS, sexMap);
-    ageCategoryMap.insert(FIVE_TO_NINE_YEARS, sexMap);
-    ageCategoryMap.insert(TEN_TO_NINETEEN_YEARS, sexMap);
-    ageCategoryMap.insert(TWENTY_YEARS_AND_ABOVE, sexMap);
-
-    // New attendance -> YES, Re-attendance -> NO
-    attendanceStats.insert(YES, ageCategoryMap);
-    attendanceStats.insert(NO, ageCategoryMap);
-
-    // Initialize all diagnoses to zero counts
-    for (QString& diagnosis : diagnosisNames) {
-        diagnosisStats.insert(diagnosis, ageCategoryMap);
-    }
 
     initializeTableWidget(ui->tableAttendances, 2);
     ui->tableAttendances->setStyleSheet(
-        "QHeaderView::section {font-size:12px; } "
-        "QHeaderView::section:nth-of-type(odd) { "
-        "background-color: beige; color:purple; }");
+        "QHeaderView::section { font-size:12px; }"
+        "QHeaderView::section:nth-of-type(odd) { background-color:beige; color:purple; }");
     ui->tableAttendances->setMaximumHeight(85);
 
-    initializeTableWidget(ui->tableDiagnoses, (int)diagnosisNames.size());
-    ui->tableDiagnoses->setStyleSheet(
-        "QHeaderView::section {font-size:14px;background-color: white; "
-        "color:black; } ");
+    initializeTableWidget(ui->tableDiagnoses, static_cast<int>(diagnosisNames.size()));
+    ui->tableDiagnoses->setStyleSheet("QHeaderView::section { font-size:14px; background-color:white; color:black; }");
+    ui->tableDiagnoses->horizontalHeader()->setStyleSheet(
+        "QHeaderView::section { font-size:11px; background-color:beige; color:purple; }");
 
-    QHeaderView* horizontal_header = ui->tableDiagnoses->horizontalHeader();
-    horizontal_header->setStyleSheet("QHeaderView::section {font-size:11px; background-color: beige; color:purple;}");
-
-    // create vetical header labels for attendances
-    QStringList vHeaders = {"NEW ATTENDANCE", "RE-ATTENDANCE"};
-    ui->tableAttendances->setVerticalHeaderLabels(vHeaders);
-
-    // Set vertical headers for all diagnoses
+    ui->tableAttendances->setVerticalHeaderLabels({"NEW ATTENDANCE", "RE-ATTENDANCE"});
     ui->tableDiagnoses->setVerticalHeaderLabels(diagnosisNames);
-
-    // Set current age category
-    ui->comboBoxCategory->setCurrentText(TWENTY_YEARS_AND_ABOVE);
+    ui->comboBoxCategory->setCurrentText(AGE_20_PLUS);
 }
 
+// ---------------------------------------------------------------------------
+// connectSignals
+// ---------------------------------------------------------------------------
 void MainWindow::connectSignals() {
     connect(ui->listWidgetAllDiagnoses, &QListWidget::itemDoubleClicked, this, &MainWindow::addToSelectedDiagnoses);
-
     connect(ui->listWidgetSelected, &QListWidget::itemDoubleClicked, this, &MainWindow::removeFromSelectedDiagnoses);
-
-    // When you type to filter diagnoses, update list widget
     connect(ui->lineEdit, &QLineEdit::textChanged, this, &MainWindow::diagnosisQueryChanged);
-
     connect(ui->dateEdit, &QDateEdit::dateChanged, this, &MainWindow::onDateChanged);
-
-    // Connect form buttons
     connect(ui->btnSave, &QPushButton::clicked, this, &MainWindow::onSave);
     connect(ui->btnReset, &QPushButton::clicked, this, &MainWindow::onResetForm);
 
-    // Connect menu actions
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::onExit);
     connect(ui->actionExpand, &QAction::triggered, this, &MainWindow::onToggleSidebar);
-
     connect(ui->actionView_Register, &QAction::triggered, this, &MainWindow::onViewRegister);
-
-    // Hide empty diagnoses if checked
-    connect(ui->checkHideEmpty, &QCheckBox::checkStateChanged, this, &MainWindow::toggleHideEmptyHiagnoses);
-
-    // Search diagnosis table by name
+    connect(ui->checkHideEmpty, &QCheckBox::checkStateChanged, this, &MainWindow::toggleHideEmptyDiagnoses);
     connect(ui->txtFilter, &QLineEdit::textChanged, this, &MainWindow::filterVisibleDiagnoses);
-
-    // actionViewall diagnoses
     connect(ui->actionView_All_Diagnoses, &QAction::triggered, this, &MainWindow::onViewDiagnoses);
     connect(ui->actionRegister_New_Diagnosis, &QAction::triggered, this, &MainWindow::onAddDiagnosis);
+    connect(ui->actionExport_CSV, &QAction::triggered, this, &MainWindow::onExportCSV);
+    connect(ui->actionBackup_Database, &QAction::triggered, this, &MainWindow::onBackupDatabase);
+    connect(ui->actionAudit_Log, &QAction::triggered, this, &MainWindow::onViewAuditLog);
+    connect(ui->actionManage_Users, &QAction::triggered, this, &MainWindow::onManageUsers);
+    connect(ui->actionChange_Password, &QAction::triggered, this, &MainWindow::onChangePassword);
+
+    // Hide admin-only actions from clerks
+    if (m_currentUser.role != UserRole::Admin) {
+        ui->actionAudit_Log->setVisible(false);
+        ui->actionManage_Users->setVisible(false);
+        ui->actionBackup_Database->setVisible(false);
+    }
 }
 
-void MainWindow::filterDiagnoses(const QString& query) {
-    if (query.trimmed().isEmpty()) {
-        // Show all diagnoses
-        ui->listWidgetAllDiagnoses->clear();
-        ui->listWidgetAllDiagnoses->addItems(diagnosisNames);
+// ---------------------------------------------------------------------------
+// Form validation
+// ---------------------------------------------------------------------------
+QStringList MainWindow::validateForm() const {
+    QStringList errors;
+    if (ui->IPN->text().trimmed().isEmpty()) {
+        errors << "IP Number is required.";
+    }
+    if (ui->comboBoxCategory->currentText().trimmed().isEmpty()) {
+        errors << "Age category is required.";
+    }
+    if (ui->comboBoxSex->currentText().trimmed().isEmpty()) {
+        errors << "Sex is required.";
+    }
+    return errors;
+}
+
+// ---------------------------------------------------------------------------
+// Save
+// ---------------------------------------------------------------------------
+void MainWindow::onSave() {
+    QStringList errors = validateForm();
+    if (!errors.isEmpty()) {
+        QMessageBox::warning(this, "Validation Error", "Please fix the following:\n\n• " + errors.join("\n• "));
         return;
     }
 
-    matchingDiagnoses = {};
-    foreach (QString d, diagnosisNames) {
-        if (d.contains(query, Qt::CaseInsensitive)) {
-            matchingDiagnoses.append(d);
-        }
+    QDate d = ui->dateEdit->date();
+    QString ipNum = ui->IPN->text().trimmed();
+
+    QStringList dxList;
+    for (int i = 0; i < ui->listWidgetSelected->count(); ++i) {
+        dxList << ui->listWidgetSelected->item(i)->text();
     }
 
-    ui->listWidgetAllDiagnoses->clear();
-    ui->listWidgetAllDiagnoses->addItems(matchingDiagnoses);
-}
+    NewHMISData data = {
+        .ageCategory = ui->comboBoxCategory->currentText(),
+        .sex = ui->comboBoxSex->currentText(),
+        .newAttendance = ui->comboBoxNewAttendance->currentText(),
+        .diagnoses = dxList,
+        .ipNumber = ipNum,
+        .month = d.month(),
+        .year = d.year(),
+    };
 
-void MainWindow::toggleHideEmptyHiagnoses(Qt::CheckState state) {
-    QAbstractItemModel* model = ui->tableDiagnoses->model();
-    int columnCount           = model->columnCount();
-    int rowCount              = model->rowCount();
+    if (db.saveNewRow(data, m_currentUser.id)) {
+        onResetForm();
+        populateAttendances(d.year(), d.month());
+        populateDiagnoses(d.year(), d.month());
+        updateDashboard(d.year(), d.month());
+        statusBar()->showMessage("Record inserted successfully", 5000);
 
-    for (int row = 0; row < rowCount; ++row) {
-        bool isRowEmpty = true;
-        for (int col = 0; col < columnCount; ++col) {
-            QModelIndex index = model->index(row, col);  // Get the index for the current cell
-            QVariant data     = model->data(index);      // Get the data in the cell
-
-            if (data.toInt() != 0) {  // Check if the data is not zero
-                isRowEmpty = false;
-                break;
-            }
+        bool ok;
+        int n = ipNum.toInt(&ok);
+        if (ok) {
+            ui->IPN->setText(QString("%1").arg(n + 1, 3, 10, QChar('0')));
         }
-
-        if (state == Qt::Checked) {
-            if (isRowEmpty) {
-                ui->tableDiagnoses->setRowHidden(row, true);
-            }
-        } else {
-            ui->tableDiagnoses->setRowHidden(row, false);
-        }
+    } else {
+        QMessageBox::critical(this, "Insert Error", "Unable to insert record:\n" + db.getLastError());
     }
 }
 
+// ---------------------------------------------------------------------------
+// Reset
+// ---------------------------------------------------------------------------
 void MainWindow::onResetForm() {
     if (ui->noClearForm->isChecked()) {
         return;
     }
-
-    // Reset the form
     if (!ui->checkKeepDiagnoses->isChecked()) {
         ui->listWidgetSelected->clear();
     }
-
-    ui->comboBoxCategory->setCurrentText(TWENTY_YEARS_AND_ABOVE);
-    ui->comboBoxNewAttendance->setCurrentText(YES);
-    ui->comboBoxSex->setCurrentText(FEMALE);
+    ui->comboBoxCategory->setCurrentText(AGE_20_PLUS);
+    ui->comboBoxNewAttendance->setCurrentText(ATT_YES);
+    ui->comboBoxSex->setCurrentText(SEX_FEMALE);
 }
 
-void MainWindow::onSave() {
-    QString ageCategory;
-    QString newAttendance;
-    QString sex;
-    QString ipNumber;
-    QDate selectedDate;
-
-    QStringList diagnosisList;
-
-    ageCategory   = ui->comboBoxCategory->currentText();
-    newAttendance = ui->comboBoxNewAttendance->currentText();
-    sex           = ui->comboBoxSex->currentText();
-    selectedDate  = ui->dateEdit->date();
-    ipNumber      = ui->IPN->text();
-
-    for (int i = 0; i < ui->listWidgetSelected->count(); ++i) {
-        diagnosisList << ui->listWidgetSelected->item(i)->text();
-    }
-
-    // Fields must in declaration order in C++, unlike in C
-    NewHMISData data = {
-        .ageCategory   = ageCategory,
-        .sex           = sex,
-        .newAttendance = newAttendance,
-        .diagnoses     = diagnosisList,
-        .ipNumber      = ipNumber,
-        .month         = selectedDate.month(),
-        .year          = selectedDate.year(),
-    };
-
-    if (db.saveNewRow(data)) {
-        // Reset form
-        onResetForm();
-
-        // Refresh the attendances tableWidget
-        populateAttendances(selectedDate.year(), selectedDate.month());
-
-        // Refresh the diagnoses tableWidget
-        populateDiagnoses(selectedDate.year(), selectedDate.month());
-
-        // Show status message
-        statusBar()->showMessage("Record inserted successfully", 5000);
-
-        // Increment IP Number automatically
-        if (!ipNumber.isEmpty()) {
-            bool ok;
-            int ipNumberInt = ipNumber.toInt(&ok);
-            if (ok) {
-                ipNumberInt++;  // Increment
-                // Format with leading zeros
-                ipNumber = QString("%1").arg(ipNumberInt, 3, 10, QChar('0'));
-                ui->IPN->setText(ipNumber);  // Set the new IP Number
-            }
-        }
-    } else {
-        QMessageBox::critical(this, "Insert Error", "Unable to insert row into the database");
-    }
-}
-
+// ---------------------------------------------------------------------------
+// Table helpers
+// ---------------------------------------------------------------------------
 void MainWindow::initializeTableWidget(QTableWidget* w, int rowCount) {
-    w->setColumnCount((int)diagnosisTableHeaders.size());
+    w->setColumnCount(static_cast<int>(diagnosisTableHeaders.size()));
     w->setHorizontalHeaderLabels(diagnosisTableHeaders);
-
-    QHeaderView* horizontalHeader = w->horizontalHeader();
-    horizontalHeader->setSectionResizeMode(0, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(1, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(2, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(3, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(4, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(5, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(6, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(7, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(8, QHeaderView::Stretch);
-    horizontalHeader->setSectionResizeMode(9, QHeaderView::Stretch);
-
-    horizontalHeader->setStyleSheet("font-family: Arial; font-size: 12px; background-color: lightgray;");
-
-    w->setEditTriggers(QAbstractItemView::NoEditTriggers);  // Disable cell editing
+    QHeaderView* h = w->horizontalHeader();
+    for (int i = 0; i < static_cast<int>(diagnosisTableHeaders.size()); ++i) {
+        h->setSectionResizeMode(i, QHeaderView::Stretch);
+    }
+    h->setStyleSheet("font-family:Arial; font-size:12px; background-color:lightgray;");
+    w->setEditTriggers(QAbstractItemView::NoEditTriggers);
     w->setAlternatingRowColors(true);
     w->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     w->setRowCount(rowCount);
 }
 
+void MainWindow::setAttendanceTableItem(int row, int col, int number) {
+    auto* item = new QTableWidgetItem(QString::number(number));
+    if (number > 0) {
+        item->setFont(QFont("Arial", 12, QFont::Bold));
+    }
+    ui->tableAttendances->setItem(row, col, item);
+}
+
+void MainWindow::setDiagnosisTableItem(int row, int col, int number) {
+    auto* item = new QTableWidgetItem(QString::number(number));
+    if (number > 0) {
+        item->setFont(QFont("Arial", 12, QFont::Bold));
+    }
+    ui->tableDiagnoses->setItem(row, col, item);
+}
+
+// ---------------------------------------------------------------------------
+// Populate tables
+// ---------------------------------------------------------------------------
 void MainWindow::populateAttendances(int year, int month) {
     HMISData rows = db.fetchHMISData(year, month);
+    MonthlyStats st = db.buildAttendanceStats(rows);
 
-    // Copy initial attendance stats map
-    auto map = attendanceStats;
-
-    // Update counts per category and sex
-    for (HMISRow& row : rows) {
-        map[row.newAttendance][row.ageCategory][row.sex]++;
-    }
-
-    // Attendances table has only two rows
-    for (int row = 0; row < 2; row++) {
-        QString newAttendance = row == 0 ? YES : NO;
-
-        setAttendenceTableItem(row, 0, map[newAttendance][ZERO_TO_TWENTY_EIGHT_DAYS][MALE]);
-        setAttendenceTableItem(row, 1, map[newAttendance][ZERO_TO_TWENTY_EIGHT_DAYS][FEMALE]);
-
-        setAttendenceTableItem(row, 2, map[newAttendance][TWENTY_NINE_DAYS_TO_FOUR_YEARS][MALE]);
-        setAttendenceTableItem(row, 3, map[newAttendance][TWENTY_NINE_DAYS_TO_FOUR_YEARS][FEMALE]);
-
-        setAttendenceTableItem(row, 4, map[newAttendance][FIVE_TO_NINE_YEARS][MALE]);
-        setAttendenceTableItem(row, 5, map[newAttendance][FIVE_TO_NINE_YEARS][FEMALE]);
-
-        setAttendenceTableItem(row, 6, map[newAttendance][TEN_TO_NINETEEN_YEARS][MALE]);
-        setAttendenceTableItem(row, 7, map[newAttendance][TEN_TO_NINETEEN_YEARS][FEMALE]);
-
-        setAttendenceTableItem(row, 8, map[newAttendance][TWENTY_YEARS_AND_ABOVE][MALE]);
-        setAttendenceTableItem(row, 9, map[newAttendance][TWENTY_YEARS_AND_ABOVE][FEMALE]);
-    }
-}
-
-void MainWindow::setAttendenceTableItem(int row, int column, int number) {
-    ui->tableAttendances->setItem(row, column, new QTableWidgetItem(QString::number(number)));
-
-    // If number is > 0, make bold
-    if (number > 0) {
-        QTableWidgetItem* item = ui->tableAttendances->item(row, column);
-        if (item != nullptr) {
-            item->setFont(QFont("Arial", 12, QFont::Bold));
-        }
-    }
-}
-
-void MainWindow::setDiagnosisTableItem(int row, int column, int number) {
-    ui->tableDiagnoses->setItem(row, column, new QTableWidgetItem(QString::number(number)));
-    if (number > 0) {
-        QTableWidgetItem* item = ui->tableDiagnoses->item(row, column);
-        if (item != nullptr) {
-            item->setFont(QFont("Arial", 12, QFont::Bold));
+    for (int r = 0; r < 2; r++) {
+        QString att = (r == 0) ? ATT_YES : ATT_NO;
+        int col = 0;
+        for (const QString& age : AGE_CATEGORIES) {
+            auto cnt = st.get(att, age);
+            setAttendanceTableItem(r, col++, cnt.male);
+            setAttendanceTableItem(r, col++, cnt.female);
         }
     }
 }
 
 void MainWindow::populateDiagnoses(int year, int month) {
     HMISData rows = db.fetchHMISData(year, month);
+    MonthlyStats st = db.buildDiagnosisStats(rows, diagnosisNames);
 
-    // Copy initial attendance stats map
-    auto map = diagnosisStats;
-
-    for (HMISRow& row : rows) {
-        for (QString& dx : row.diagnoses) {
-            // This will insert missing diagnoses as per std::unordered_map.
-            map[dx][row.ageCategory][row.sex]++;
+    for (int row = 0; row < static_cast<int>(diagnosisNames.size()); row++) {
+        int col = 0;
+        for (const QString& age : AGE_CATEGORIES) {
+            auto cnt = st.get(diagnosisNames[row], age);
+            setDiagnosisTableItem(row, col++, cnt.male);
+            setDiagnosisTableItem(row, col++, cnt.female);
         }
-    }
-
-    // Add stanadard diagnoses
-    for (int row = 0; row < diagnosisNames.size(); row++) {
-        QString dx = diagnosisNames[row];
-        if (!map.contains(dx)) {
-            continue;
-        }
-
-        setDiagnosisTableItem(row, 0, map[dx][ZERO_TO_TWENTY_EIGHT_DAYS][MALE]);
-        setDiagnosisTableItem(row, 1, map[dx][ZERO_TO_TWENTY_EIGHT_DAYS][FEMALE]);
-
-        setDiagnosisTableItem(row, 2, map[dx][TWENTY_NINE_DAYS_TO_FOUR_YEARS][MALE]);
-        setDiagnosisTableItem(row, 3, map[dx][TWENTY_NINE_DAYS_TO_FOUR_YEARS][FEMALE]);
-
-        setDiagnosisTableItem(row, 4, map[dx][FIVE_TO_NINE_YEARS][MALE]);
-        setDiagnosisTableItem(row, 5, map[dx][FIVE_TO_NINE_YEARS][FEMALE]);
-
-        setDiagnosisTableItem(row, 6, map[dx][TEN_TO_NINETEEN_YEARS][MALE]);
-        setDiagnosisTableItem(row, 7, map[dx][TEN_TO_NINETEEN_YEARS][FEMALE]);
-
-        setDiagnosisTableItem(row, 8, map[dx][TWENTY_YEARS_AND_ABOVE][MALE]);
-        setDiagnosisTableItem(row, 9, map[dx][TWENTY_YEARS_AND_ABOVE][FEMALE]);
     }
 }
 
-void MainWindow::addToSelectedDiagnoses(QListWidgetItem* item) {
-    QStringList selectedItems;
-    for (int i = 0; i < ui->listWidgetSelected->count(); ++i) {
-        selectedItems << ui->listWidgetSelected->item(i)->text();
+// ---------------------------------------------------------------------------
+// Dashboard summary
+// ---------------------------------------------------------------------------
+void MainWindow::updateDashboard(int year, int month) {
+    auto s = db.getMonthlySummary(year, month);
+    QString msg =
+        QString("Total: %1  |  New: %2  |  Re-att: %3").arg(s.totalPatients).arg(s.newAttendances).arg(s.reAttendances);
+    if (!s.topDiagnosis1.isEmpty()) {
+        msg += "  |  Top: " + s.topDiagnosis1;
     }
+    if (!s.topDiagnosis2.isEmpty()) {
+        msg += ", " + s.topDiagnosis2;
+    }
+    if (!s.topDiagnosis3.isEmpty()) {
+        msg += ", " + s.topDiagnosis3;
+    }
+    statusBar()->showMessage(msg);
+}
 
-    int row = (int)selectedItems.size();
-    if (selectedItems.contains(item->text())) {
-        QMessageBox::information(this, "Duplicate diagnosis", item->text() + " already added!");
-        return;
+// ---------------------------------------------------------------------------
+// Date change
+// ---------------------------------------------------------------------------
+void MainWindow::onDateChanged(const QDate& date) {
+    currentYear = date.year();
+    currentMonth = date.month();
+    populateAttendances(currentYear, currentMonth);
+    populateDiagnoses(currentYear, currentMonth);
+    updateDashboard(currentYear, currentMonth);
+    ui->IPN->setText(db.nextIPNumber(date.year(), date.month()));
+}
+
+// ---------------------------------------------------------------------------
+// Diagnoses list
+// ---------------------------------------------------------------------------
+void MainWindow::addToSelectedDiagnoses(QListWidgetItem* item) {
+    for (int i = 0; i < ui->listWidgetSelected->count(); ++i) {
+        if (ui->listWidgetSelected->item(i)->text() == item->text()) {
+            QMessageBox::information(this, "Duplicate", item->text() + " already added.");
+            return;
+        }
     }
-    ui->listWidgetSelected->insertItem(row, item->text());
+    ui->listWidgetSelected->addItem(item->text());
 }
 
 void MainWindow::removeFromSelectedDiagnoses(QListWidgetItem* item) {
     delete ui->listWidgetSelected->takeItem(ui->listWidgetSelected->row(item));
 }
 
-void MainWindow::onDateChanged(const QDate& date) {
-    currentYear  = date.year();
-    currentMonth = date.month();
-    populateAttendances(currentYear, currentMonth);
-    populateDiagnoses(currentYear, currentMonth);
+void MainWindow::diagnosisQueryChanged(const QString& query) { filterDiagnoses(query); }
 
-    // Set the next IP for the current month
-    QString nextIP = db.nextIPNumber(date.year(), date.month());
-    ui->IPN->setText(nextIP);
-}
-
-void MainWindow::onToggleSidebar(bool toggled) {
-    ui->sidebar->setVisible(toggled);
-    if (toggled) {
-        ui->actionExpand->setIcon(QIcon(":/icons/toggle-on.png"));
-    } else {
-        ui->actionExpand->setIcon(QIcon(":/icons/toggle-off.png"));
+void MainWindow::filterDiagnoses(const QString& query) {
+    ui->listWidgetAllDiagnoses->clear();
+    if (query.trimmed().isEmpty()) {
+        ui->listWidgetAllDiagnoses->addItems(diagnosisNames);
+        return;
     }
-}
-
-void MainWindow::onExit() {
-    qApp->quit();
-}
-
-void MainWindow::onViewRegister() {
-    QDate date = ui->dateEdit->date();
-    int year   = date.year();
-    int month  = date.month();
-
-    HMISData rows = db.fetchHMISData(year, month);
-
-    auto* registerDialog = new Register(&db, year, month, this);
-
-    registerDialog->setData(rows);
-    registerDialog->showMaximized();
-
-    // Show plots
-    auto dxMap         = diagnosisStats;
-    auto attendanceMap = attendanceStats;
-
-    for (HMISRow& row : rows) {
-        for (QString& dx : row.diagnoses) {
-            dxMap[dx][row.ageCategory][row.sex]++;
+    for (const QString& d : diagnosisNames) {
+        if (d.contains(query, Qt::CaseInsensitive)) {
+            ui->listWidgetAllDiagnoses->addItem(d);
         }
-        attendanceMap[row.newAttendance][row.ageCategory][row.sex]++;
     }
-
-    registerDialog->plotData(dxMap, attendanceMap);
 }
 
-void MainWindow::diagnosisQueryChanged(const QString& query) {
-    filterDiagnoses(query);
+void MainWindow::toggleHideEmptyDiagnoses(Qt::CheckState state) {
+    int cols = ui->tableDiagnoses->columnCount();
+    for (int row = 0; row < ui->tableDiagnoses->rowCount(); ++row) {
+        bool empty = true;
+        for (int col = 0; col < cols; ++col) {
+            if (ui->tableDiagnoses->model()->data(ui->tableDiagnoses->model()->index(row, col)).toInt() != 0) {
+                empty = false;
+                break;
+            }
+        }
+        ui->tableDiagnoses->setRowHidden(row, state == Qt::Checked && empty);
+    }
 }
 
 void MainWindow::filterVisibleDiagnoses(const QString& query) {
-    // match query with vertical header(this is the diagnosis name)
-    int rowCount = ui->tableDiagnoses->rowCount();
-    for (int row = 0; row < rowCount; ++row) {
-        QTableWidgetItem* item = ui->tableDiagnoses->verticalHeaderItem(row);
-
+    for (int row = 0; row < ui->tableDiagnoses->rowCount(); ++row) {
+        auto* item = ui->tableDiagnoses->verticalHeaderItem(row);
         if (item != nullptr) {
-            QString text = item->text().trimmed();
-            if (text.contains(query.trimmed(), Qt::CaseInsensitive)) {
-                ui->tableDiagnoses->setRowHidden(row, false);
-            } else {
-                ui->tableDiagnoses->setRowHidden(row, true);
-            }
+            ui->tableDiagnoses->setRowHidden(row, !item->text().contains(query.trimmed(), Qt::CaseInsensitive));
         }
     }
 }
 
-// View all diagnoses in a modal dialog
+// ---------------------------------------------------------------------------
+// Sidebar
+// ---------------------------------------------------------------------------
+void MainWindow::onToggleSidebar(bool toggled) {
+    ui->sidebar->setVisible(toggled);
+    ui->actionExpand->setIcon(QIcon(toggled ? ":/icons/toggle-on.png" : ":/icons/toggle-off.png"));
+}
+
+// ---------------------------------------------------------------------------
+// View register
+// ---------------------------------------------------------------------------
+void MainWindow::onViewRegister() {
+    QDate date = ui->dateEdit->date();
+    HMISData rows = db.fetchHMISData(date.year(), date.month());
+    auto* reg = new Register(&db, date.year(), date.month(), this);
+    reg->setCurrentUser(m_currentUser);
+    reg->setData(rows);
+    reg->showMaximized();
+    reg->plotData(db.buildDiagnosisStats(rows, diagnosisNames), db.buildAttendanceStats(rows));
+}
+
+// ---------------------------------------------------------------------------
+// Diagnoses management
+// ---------------------------------------------------------------------------
 void MainWindow::onViewDiagnoses() {
     auto* dialog = new QDialog(this);
-    dialog->setWindowTitle("Diagnoses");
+    dialog->setWindowTitle("All Diagnoses");
     dialog->setModal(true);
     dialog->setMinimumSize(600, 400);
-
     auto* layout = new QVBoxLayout(dialog);
-    auto* list   = new QListWidget(dialog);
+    auto* list = new QListWidget(dialog);
     list->addItems(diagnosisNames);
-
     layout->addWidget(list);
-    dialog->setLayout(layout);
-
     dialog->exec();
 }
 
-// Open modal to add new diagnosis
 void MainWindow::onAddDiagnosis() {
     auto* dialog = new QDialog(this);
-    dialog->setWindowTitle("Add Diagnosis");
+    dialog->setWindowTitle("Register New Diagnosis");
     dialog->setModal(true);
-    dialog->setFixedSize(400, 200);
-
+    dialog->setFixedSize(420, 140);
     auto* layout = new QVBoxLayout(dialog);
-    auto* line   = new QLineEdit(dialog);
+    auto* line = new QLineEdit(dialog);
     line->setPlaceholderText("Enter diagnosis name");
-    auto* button = new QPushButton("Add", dialog);
-
+    auto* btn = new QPushButton("Add", dialog);
     layout->addWidget(line);
-    layout->addWidget(button);
-
-    connect(button, &QPushButton::clicked, [this, line, dialog]() {
+    layout->addWidget(btn);
+    connect(btn, &QPushButton::clicked, [this, line, dialog]() {
         QString name = line->text().trimmed();
         if (name.isEmpty()) {
-            QMessageBox::warning(this, "Error", "Diagnosis name cannot be empty");
+            QMessageBox::warning(this, "Error", "Name cannot be empty.");
             return;
         }
-
         if (db.diagnosisExists(name)) {
-            QMessageBox::warning(this, "Error", "Diagnosis already exists");
+            QMessageBox::warning(this, "Duplicate", "Already exists.");
             return;
         }
-
         if (db.insertDiagnoses(QStringList{name})) {
             diagnosisNames << name;
             ui->listWidgetAllDiagnoses->addItem(name);
+            int newRow = ui->tableDiagnoses->rowCount();
+            ui->tableDiagnoses->setRowCount(newRow + 1);
+            ui->tableDiagnoses->setVerticalHeaderItem(newRow, new QTableWidgetItem(name));
+            for (int c = 0; c < static_cast<int>(diagnosisTableHeaders.size()); ++c) {
+                ui->tableDiagnoses->setItem(newRow, c, new QTableWidgetItem("0"));
+            }
             dialog->accept();
         } else {
-            QMessageBox::critical(this, "Error", "Unable to add diagnosis");
+            QMessageBox::critical(this, "Error", "Failed: " + db.getLastError());
+        }
+    });
+    dialog->exec();
+}
+
+// ---------------------------------------------------------------------------
+// Export CSV
+// ---------------------------------------------------------------------------
+void MainWindow::onExportCSV() {
+    QDate date = ui->dateEdit->date();
+    QString def = QString("HMIS_%1_%2.csv").arg(date.year()).arg(date.month());
+    QString path = QFileDialog::getSaveFileName(this, "Export CSV", def, "CSV Files (*.csv);;All Files (*)");
+    if (path.isEmpty()) {
+        return;
+    }
+
+    QFile f(path);
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Export Error", "Cannot write to: " + path);
+        return;
+    }
+    f.write(db.exportCSV(date.year(), date.month()).toUtf8());
+    f.close();
+    statusBar()->showMessage("Exported to " + path, 5000);
+}
+
+// ---------------------------------------------------------------------------
+// Backup
+// ---------------------------------------------------------------------------
+void MainWindow::onBackupDatabase() {
+    QString path = QFileDialog::getSaveFileName(this, "Backup Database", "hmis_backup.sqlite3",
+                                                "SQLite (*.sqlite3);;All Files (*)");
+    if (path.isEmpty()) {
+        return;
+    }
+    if (db.backupTo(path)) {
+        QMessageBox::information(this, "Backup Complete", "Backed up to:\n" + path);
+    } else {
+        QMessageBox::critical(this, "Backup Failed", "Backup failed. Only SQLite databases can be backed up this way.");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Audit log
+// ---------------------------------------------------------------------------
+void MainWindow::onViewAuditLog() {
+    AuditLogDialog dlg(db, this);
+    dlg.exec();
+}
+
+// ---------------------------------------------------------------------------
+// User management
+// ---------------------------------------------------------------------------
+void MainWindow::onManageUsers() {
+    auto* dialog = new QDialog(this);
+    dialog->setWindowTitle("Manage Users");
+    dialog->setMinimumSize(520, 400);
+    auto* vl = new QVBoxLayout(dialog);
+
+    auto* table = new QTableWidget(dialog);
+    table->setColumnCount(3);
+    table->setHorizontalHeaderLabels({"ID", "Username", "Role"});
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    vl->addWidget(table);
+
+    auto loadUsers = [&]() {
+        auto users = db.getAllUsers();
+        table->setRowCount(static_cast<int>(users.size()));
+        for (int i = 0; i < static_cast<int>(users.size()); ++i) {
+            table->setItem(i, 0, new QTableWidgetItem(QString::number(users[i].id)));
+            table->setItem(i, 1, new QTableWidgetItem(users[i].username));
+            table->setItem(i, 2, new QTableWidgetItem(users[i].role == UserRole::Admin ? "Admin" : "Clerk"));
+        }
+    };
+    loadUsers();
+
+    auto* addGroup = new QGroupBox("Add New User", dialog);
+    auto* fl = new QFormLayout(addGroup);
+    auto* newUser = new QLineEdit(addGroup);
+    auto* newPass = new QLineEdit(addGroup);
+    newPass->setEchoMode(QLineEdit::Password);
+    auto* roleCombo = new QComboBox(addGroup);
+    roleCombo->addItems({"Clerk", "Admin"});
+    fl->addRow("Username:", newUser);
+    fl->addRow("Password:", newPass);
+    fl->addRow("Role:", roleCombo);
+    auto* addBtn = new QPushButton("Add User", addGroup);
+    fl->addRow(addBtn);
+    vl->addWidget(addGroup);
+
+    connect(addBtn, &QPushButton::clicked, [&]() {
+        QString u = newUser->text().trimmed(), p = newPass->text();
+        if (u.isEmpty() || p.isEmpty()) {
+            QMessageBox::warning(dialog, "Error", "Username and password required.");
+            return;
+        }
+        if (db.userExists(u)) {
+            QMessageBox::warning(dialog, "Error", "Username already taken.");
+            return;
+        }
+        UserRole r = roleCombo->currentText() == "Admin" ? UserRole::Admin : UserRole::Clerk;
+        if (db.createUser(u, p, r)) {
+            loadUsers();
+            newUser->clear();
+            newPass->clear();
+        } else {
+            QMessageBox::critical(dialog, "Error", "Failed to create user.");
         }
     });
 
-    dialog->setLayout(layout);
+    auto* closeBtn = new QPushButton("Close", dialog);
+    connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::accept);
+    vl->addWidget(closeBtn);
     dialog->exec();
 }
+
+// ---------------------------------------------------------------------------
+// Change password
+// ---------------------------------------------------------------------------
+void MainWindow::onChangePassword() {
+    auto* dialog = new QDialog(this);
+    dialog->setWindowTitle("Change Password");
+    dialog->setFixedSize(340, 210);
+    auto* fl = new QFormLayout(dialog);
+    auto* current = new QLineEdit(dialog);
+    current->setEchoMode(QLineEdit::Password);
+    auto* newPw = new QLineEdit(dialog);
+    newPw->setEchoMode(QLineEdit::Password);
+    auto* confirm = new QLineEdit(dialog);
+    confirm->setEchoMode(QLineEdit::Password);
+    fl->addRow("Current password:", current);
+    fl->addRow("New password:", newPw);
+    fl->addRow("Confirm:", confirm);
+    auto* btn = new QPushButton("Update Password", dialog);
+    fl->addRow(btn);
+    connect(btn, &QPushButton::clicked, [&]() {
+        if (newPw->text() != confirm->text()) {
+            QMessageBox::warning(dialog, "Mismatch", "Passwords don't match.");
+            return;
+        }
+        if (newPw->text().length() < 6) {
+            QMessageBox::warning(dialog, "Too short", "Minimum 6 characters.");
+            return;
+        }
+        if (!db.authenticate(m_currentUser.username, current->text())) {
+            QMessageBox::warning(dialog, "Error", "Current password incorrect.");
+            return;
+        }
+        if (db.changePassword(m_currentUser.id, newPw->text())) {
+            QMessageBox::information(dialog, "Success", "Password updated.");
+        } else {
+            QMessageBox::critical(dialog, "Error", "Update failed.");
+        }
+        dialog->accept();
+    });
+    dialog->exec();
+}
+
+// ---------------------------------------------------------------------------
+// Exit
+// ---------------------------------------------------------------------------
+void MainWindow::onExit() { qApp->quit(); }

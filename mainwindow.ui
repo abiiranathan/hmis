@@ -409,13 +409,20 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuHMIS">
-    <property name="title">
-     <string>Menu</string>
-    </property>
-    <addaction name="actionView_Register"/>
-    <addaction name="actionExpand"/>
-    <addaction name="actionExit"/>
-   </widget>
+     <property name="title">
+      <string>Menu</string>
+     </property>
+     <addaction name="actionView_Register"/>
+     <addaction name="actionExpand"/>
+     <addaction name="separator"/>
+     <addaction name="actionExport_CSV"/>
+     <addaction name="actionBackup_Database"/>
+     <addaction name="actionAudit_Log"/>
+     <addaction name="actionManage_Users"/>
+     <addaction name="actionChange_Password"/>
+     <addaction name="separator"/>
+     <addaction name="actionExit"/>
+    </widget>
    <widget class="QMenu" name="menuDiagnoses">
     <property name="title">
      <string>Diagnoses</string>
@@ -466,6 +473,13 @@ background-color: rgb(26, 95, 180);</string>
    <addaction name="actionView_All_Diagnoses"/>
    <addaction name="actionRegister_New_Diagnosis"/>
    <addaction name="actionExpand"/>
+    <addaction name="separator"/>
+   <!-- Add new actions -->
+    <addaction name="actionExport_CSV"/>
+    <addaction name="actionBackup_Database"/>
+    <addaction name="actionAudit_Log"/>
+    <addaction name="actionManage_Users"/>
+    <addaction name="actionChange_Password"/>
    <addaction name="separator"/>
    <addaction name="actionExit"/>
   </widget>
@@ -528,15 +542,40 @@ background-color: rgb(26, 95, 180);</string>
     <enum>QAction::MenuRole::ApplicationSpecificRole</enum>
    </property>
   </action>
-  <action name="actionRegister_New_Diagnosis">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::ContactNew"/>
-   </property>
-   <property name="text">
-    <string>Register New Diagnosis</string>
-   </property>
-  </action>
- </widget>
+   <action name="actionRegister_New_Diagnosis">
+    <property name="icon">
+     <iconset theme="QIcon::ThemeIcon::ContactNew"/>
+    </property>
+    <property name="text">
+     <string>Register New Diagnosis</string>
+    </property>
+   </action>
+   <action name="actionExport_CSV">
+    <property name="text">
+     <string>Export CSV</string>
+    </property>
+   </action>
+   <action name="actionBackup_Database">
+    <property name="text">
+     <string>Backup Database</string>
+    </property>
+   </action>
+   <action name="actionAudit_Log">
+    <property name="text">
+     <string>Audit Log</string>
+    </property>
+   </action>
+   <action name="actionManage_Users">
+    <property name="text">
+     <string>Manage Users</string>
+    </property>
+   </action>
+   <action name="actionChange_Password">
+    <property name="text">
+     <string>Change Password</string>
+    </property>
+   </action>
+  </widget>
  <tabstops>
   <tabstop>IPN</tabstop>
   <tabstop>comboBoxCategory</tabstop>

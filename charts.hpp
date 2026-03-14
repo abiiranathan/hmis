@@ -14,21 +14,20 @@
 
 // Utility function to generate a random color
 inline QColor generateRandomColor() {
-    return {QRandomGenerator::global()->bounded(256),
-            QRandomGenerator::global()->bounded(256),
+    return {QRandomGenerator::global()->bounded(256), QRandomGenerator::global()->bounded(256),
             QRandomGenerator::global()->bounded(256)};
 }
 
 // Abstract Chart Class - Base for all Chart Types
 class AbstractChart {
-public:
+  public:
     [[nodiscard]] virtual QWidget* widget() const = 0;
-    virtual ~AbstractChart()                      = default;
+    virtual ~AbstractChart() = default;
 };
 
 // Bar Chart Class
 class BarChart : public AbstractChart {
-public:
+  public:
     /**
      * @brief Creates a bar chart with the specified set name, title, and x-axis labels.
      * @param setName Name of the bar set
@@ -42,7 +41,6 @@ public:
           chartView(new QChartView(chart)),
           title(std::move(chartTitle)),
           xLabels(xLabels) {
-
         chart->setTitle(title);
 
         axisX->append(xLabels);
@@ -72,18 +70,12 @@ public:
     }
 
     // Set the range for the y-axis
-    void setYRange(qreal min, qreal max) {
-        axisY->setRange(min, max);
-    }
+    void setYRange(qreal min, qreal max) { axisY->setRange(min, max); }
 
     // Returns the QChartView widget.
-    [[nodiscard]] QWidget* widget() const override {
-        return chartView;
-    }
+    [[nodiscard]] QWidget* widget() const override { return chartView; }
 
-    void setTheme(QChart::ChartTheme theme) {
-        chart->setTheme(theme);
-    }
+    void setTheme(QChart::ChartTheme theme) { chart->setTheme(theme); }
 
     void setChartTitle(const QString& newTitle) {
         title = newTitle;
@@ -96,35 +88,27 @@ public:
         axisX->append(xLabels);
     }
 
-    void setAnimationOptions(QChart::AnimationOptions options) {
-        chart->setAnimationOptions(options);
-    }
+    void setAnimationOptions(QChart::AnimationOptions options) { chart->setAnimationOptions(options); }
 
-    void setLegendVisible(bool visible) {
-        chart->legend()->setVisible(visible);
-    }
+    void setLegendVisible(bool visible) { chart->legend()->setVisible(visible); }
 
-    void setLegendAlignment(Qt::Alignment alignment) {
-        chart->legend()->setAlignment(alignment);
-    }
+    void setLegendAlignment(Qt::Alignment alignment) { chart->legend()->setAlignment(alignment); }
 
-    ~BarChart() override {
-        delete chart;
-    }
+    ~BarChart() override { delete chart; }
 
-private:
+  private:
     QList<QBarSeries*> series;
-    QChart* chart           = nullptr;
+    QChart* chart = nullptr;
     QBarCategoryAxis* axisX = nullptr;
-    QValueAxis* axisY       = nullptr;
-    QChartView* chartView   = nullptr;
+    QValueAxis* axisY = nullptr;
+    QChartView* chartView = nullptr;
     QString title;
     QStringList xLabels;
 };
 
 // Line Chart Class
 class LineChart : public AbstractChart {
-public:
+  public:
     LineChart(QString chartTitle)
         : chart(new QChart()),
           axisX(new QValueAxis(chart)),
@@ -165,55 +149,39 @@ public:
     }
 
     // Set the range for the y-axis
-    void setYRange(qreal min, qreal max) {
-        axisY->setRange(min, max);
-    }
+    void setYRange(qreal min, qreal max) { axisY->setRange(min, max); }
 
-    void setXRange(qreal min, qreal max) {
-        axisX->setRange(min, max);
-    }
+    void setXRange(qreal min, qreal max) { axisX->setRange(min, max); }
 
     // Return the chart widget for display
-    [[nodiscard]] QWidget* widget() const override {
-        return chartView;
-    }
+    [[nodiscard]] QWidget* widget() const override { return chartView; }
 
-    void setTheme(QChart::ChartTheme theme) {
-        chart->setTheme(theme);
-    }
+    void setTheme(QChart::ChartTheme theme) { chart->setTheme(theme); }
 
     void setChartTitle(const QString& newTitle) {
         title = newTitle;
         chart->setTitle(title);
     }
 
-    void setAnimationOptions(QChart::AnimationOptions options) {
-        chart->setAnimationOptions(options);
-    }
+    void setAnimationOptions(QChart::AnimationOptions options) { chart->setAnimationOptions(options); }
 
-    void setLegendVisible(bool visible) {
-        chart->legend()->setVisible(visible);
-    }
+    void setLegendVisible(bool visible) { chart->legend()->setVisible(visible); }
 
-    void setLegendAlignment(Qt::Alignment alignment) {
-        chart->legend()->setAlignment(alignment);
-    }
+    void setLegendAlignment(Qt::Alignment alignment) { chart->legend()->setAlignment(alignment); }
 
-    ~LineChart() override {
-        delete chart;
-    }
+    ~LineChart() override { delete chart; }
 
-private:
-    QChart* chart         = nullptr;  // Chart object to manage the series and axes
-    QValueAxis* axisX     = nullptr;  // Numerical x-axis
-    QValueAxis* axisY     = nullptr;  // Numerical y-axis
+  private:
+    QChart* chart = nullptr;          // Chart object to manage the series and axes
+    QValueAxis* axisX = nullptr;      // Numerical x-axis
+    QValueAxis* axisY = nullptr;      // Numerical y-axis
     QChartView* chartView = nullptr;  // Widget to display the chart
     QString title;
 };
 
 // Spline Chart Class
 class SplineChart : public AbstractChart {
-public:
+  public:
     SplineChart(QString chartTitle)
         : chart(new QChart()),
           axisX(new QValueAxis(chart)),
@@ -253,61 +221,44 @@ public:
     }
 
     // Set the range for the y-axis
-    void setYRange(qreal min, qreal max) {
-        axisY->setRange(min, max);
-    }
+    void setYRange(qreal min, qreal max) { axisY->setRange(min, max); }
 
-    void setXRange(qreal min, qreal max) {
-        axisX->setRange(min, max);
-    }
+    void setXRange(qreal min, qreal max) { axisX->setRange(min, max); }
 
     // Return the chart widget for display
-    [[nodiscard]] QWidget* widget() const override {
-        return chartView;
-    }
+    [[nodiscard]] QWidget* widget() const override { return chartView; }
 
-    void setTheme(QChart::ChartTheme theme) {
-        chart->setTheme(theme);
-    }
+    void setTheme(QChart::ChartTheme theme) { chart->setTheme(theme); }
 
     void setChartTitle(const QString& newTitle) {
         title = newTitle;
         chart->setTitle(title);
     }
 
-    void setAnimationOptions(QChart::AnimationOptions options) {
-        chart->setAnimationOptions(options);
-    }
+    void setAnimationOptions(QChart::AnimationOptions options) { chart->setAnimationOptions(options); }
 
-    void setLegendVisible(bool visible) {
-        chart->legend()->setVisible(visible);
-    }
+    void setLegendVisible(bool visible) { chart->legend()->setVisible(visible); }
 
-    void setLegendAlignment(Qt::Alignment alignment) {
-        chart->legend()->setAlignment(alignment);
-    }
+    void setLegendAlignment(Qt::Alignment alignment) { chart->legend()->setAlignment(alignment); }
 
-    ~SplineChart() override {
-        delete chart;
-    }
+    ~SplineChart() override { delete chart; }
 
-private:
-    QChart* chart         = nullptr;  // Chart object to manage the series and axes
-    QValueAxis* axisX     = nullptr;  // Numerical x-axis
-    QValueAxis* axisY     = nullptr;  // Numerical y-axis
+  private:
+    QChart* chart = nullptr;          // Chart object to manage the series and axes
+    QValueAxis* axisX = nullptr;      // Numerical x-axis
+    QValueAxis* axisY = nullptr;      // Numerical y-axis
     QChartView* chartView = nullptr;  // Widget to display the chart
     QString title;
 };
 
 // Pie Chart Class
 class PieChart : public AbstractChart {
-public:
+  public:
     PieChart(QString chartTitle)
         : chart(new QChart()),
           series(new QPieSeries(chart)),
           chartView(new QChartView(chart)),
           title(std::move(chartTitle)) {
-
         // Add the series to the chart
         chart->addSeries(series);
 
@@ -335,38 +286,26 @@ public:
     }
 
     // Return the chart Widget for display
-    [[nodiscard]] QWidget* widget() const override {
-        return chartView;
-    }
+    [[nodiscard]] QWidget* widget() const override { return chartView; }
 
     void setChartTitle(const QString& newTitle) {
         title = newTitle;
         chart->setTitle(title);
     }
 
-    void setTheme(QChart::ChartTheme theme) {
-        chart->setTheme(theme);
-    }
+    void setTheme(QChart::ChartTheme theme) { chart->setTheme(theme); }
 
-    void setAnimationOptions(QChart::AnimationOptions options) {
-        chart->setAnimationOptions(options);
-    }
+    void setAnimationOptions(QChart::AnimationOptions options) { chart->setAnimationOptions(options); }
 
-    void setLegendVisible(bool visible) {
-        chart->legend()->setVisible(visible);
-    }
+    void setLegendVisible(bool visible) { chart->legend()->setVisible(visible); }
 
-    void setLegendAlignment(Qt::Alignment alignment) {
-        chart->legend()->setAlignment(alignment);
-    }
+    void setLegendAlignment(Qt::Alignment alignment) { chart->legend()->setAlignment(alignment); }
 
-    ~PieChart() override {
-        delete chart;
-    }
+    ~PieChart() override { delete chart; }
 
-private:
-    QChart* chart         = nullptr;  // Chart object to manage the series
-    QPieSeries* series    = nullptr;  // Series to hold pie slices
+  private:
+    QChart* chart = nullptr;          // Chart object to manage the series
+    QPieSeries* series = nullptr;     // Series to hold pie slices
     QChartView* chartView = nullptr;  // Widget to display the chart
     QString title;
 };

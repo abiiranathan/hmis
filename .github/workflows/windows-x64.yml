@@ -44,7 +44,12 @@ jobs:
       - name: Install NSIS
         run: |
           choco install nsis --version=3.11 -y
-          $env:PATH += ";C:\Program Files (x86)\NSIS"
+          $nsisPath = (Get-Command makensis -ErrorAction SilentlyContinue)?.Source
+          if (-not $nsisPath) {
+            $nsisPath = Get-ChildItem "C:\Program Files*" -Recurse -Filter "makensis.exe" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty DirectoryName
+          }
+          Write-Host "NSIS found at: $nsisPath"
+          echo "NSIS_PATH=$nsisPath" >> $env:GITHUB_ENV
         shell: pwsh
 
       - name: Configure CMake

@@ -3,7 +3,7 @@ name: Qt6 Windows Build and Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build:
@@ -30,11 +30,11 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.7.0'
-          host: 'windows'
-          target: 'desktop'
+          version: "6.7.0"
+          host: "windows"
+          target: "desktop"
           cache: true
-          modules: 'qtcharts'
+          modules: "qtcharts"
 
       - name: Setup MSVC Environment
         uses: ilammy/msvc-dev-cmd@v1
@@ -44,6 +44,7 @@ jobs:
       - name: Install NSIS
         run: |
           choco install nsis --version=3.11 -y
+          $env:PATH += ";C:\Program Files (x86)\NSIS"
         shell: pwsh
 
       - name: Configure CMake
@@ -83,7 +84,7 @@ jobs:
           Copy-Item -Path icons/favicon.ico -Destination build/release/deploy/
           Copy-Item -Path images/hmis_installer.bmp -Destination build/release/deploy/
           Copy-Item -Path images/hmis_finish_page.bmp -Destination build/release/deploy/
-          
+
           # Conditionally copy LICENSE.txt if it exists
           $licenseExists = Test-Path LICENSE.txt
           if ($licenseExists) {

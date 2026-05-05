@@ -9,7 +9,9 @@
 #include "MonthlyStats.hpp"
 #include "database.hpp"
 
-namespace Ui { class Register; }
+namespace Ui {
+class Register;
+}
 
 class Register : public QMainWindow {
     Q_OBJECT
@@ -28,7 +30,7 @@ class Register : public QMainWindow {
     void populateTableWithData();
     void hideIDColumn();
 
-public:
+  public:
     explicit Register(Database* db, int year, int month, QWidget* parent = nullptr);
     ~Register() override;
 
@@ -36,7 +38,7 @@ public:
     void setData(const QList<HMISRow>& data);
     void plotData(const MonthlyStats& dxMap, const MonthlyStats& attendanceMap);
 
-private slots:
+  private slots:
     void onSearchTextChanged(const QString& text);
     void onSearchTypeChanged(int index);
     void itemChanged(QTableWidgetItem* item);

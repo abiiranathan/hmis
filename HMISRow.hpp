@@ -5,7 +5,7 @@
 #include <QString>
 
 class HMISRow {
-public:
+  public:
     int id;                 // ID of the record
     QString ageCategory;    // HMIS age category
     QString sex;            // Sex (Male | Female)

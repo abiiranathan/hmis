@@ -7,10 +7,10 @@
 
 class AuditLogDialog : public QDialog {
     Q_OBJECT
-public:
+  public:
     explicit AuditLogDialog(Database& db, QWidget* parent = nullptr);
 
-private:
+  private:
     void loadData();
     Database& m_db;
     QTableWidget* m_table;

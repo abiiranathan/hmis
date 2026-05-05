@@ -43,15 +43,15 @@ struct User {
 struct AuditEntry {
     int id;
     QString username;
-    QString action;      // "INSERT" | "UPDATE" | "DELETE"
+    QString action;  // "INSERT" | "UPDATE" | "DELETE"
     QString tableName;
     int recordId;
     QString detail;
-    QString changedAt;   // ISO datetime string
+    QString changedAt;  // ISO datetime string
 };
 
 class Database {
-public:
+  public:
     Database();
 
     // Connection
@@ -94,41 +94,39 @@ public:
 
     // Summary counts for dashboard
     struct MonthlySummary {
-        int totalPatients      = 0;
-        int newAttendances     = 0;
-        int reAttendances      = 0;
+        int totalPatients = 0;
+        int newAttendances = 0;
+        int reAttendances = 0;
         QString topDiagnosis1;
         QString topDiagnosis2;
         QString topDiagnosis3;
     };
     MonthlySummary getMonthlySummary(int year, int month);
 
-private:
+  private:
     const QString dxSeparator = "____";
 
     QSqlDatabase db;
     ConnOptions m_connOptions;
 
     // Internal helpers
-    void logAudit(QSqlQuery& q, int actorUserId, const QString& action,
-                  const QString& table, int recordId, const QString& detail);
+    void logAudit(QSqlQuery& q, int actorUserId, const QString& action, const QString& table, int recordId,
+                  const QString& detail);
     static QString hashPassword(const QString& password, const QString& salt);
     static QString generateSalt();
 };
 
 // Age categories (shared constants used by UI and DB layer)
-inline const QString AGE_0_28D       = "0 - 28 days";
-inline const QString AGE_29D_4Y      = "29 days - 4 years";
-inline const QString AGE_5_9Y        = "5 - 9 years";
-inline const QString AGE_10_19Y      = "10 - 19 years";
-inline const QString AGE_20_PLUS     = "20 years and above";
-inline const QStringList AGE_CATEGORIES = {
-    AGE_0_28D, AGE_29D_4Y, AGE_5_9Y, AGE_10_19Y, AGE_20_PLUS
-};
+inline const QString AGE_0_28D = "0 - 28 days";
+inline const QString AGE_29D_4Y = "29 days - 4 years";
+inline const QString AGE_5_9Y = "5 - 9 years";
+inline const QString AGE_10_19Y = "10 - 19 years";
+inline const QString AGE_20_PLUS = "20 years and above";
+inline const QStringList AGE_CATEGORIES = {AGE_0_28D, AGE_29D_4Y, AGE_5_9Y, AGE_10_19Y, AGE_20_PLUS};
 
-inline const QString SEX_MALE   = "Male";
+inline const QString SEX_MALE = "Male";
 inline const QString SEX_FEMALE = "Female";
-inline const QString ATT_YES    = "YES";
-inline const QString ATT_NO     = "NO";
+inline const QString ATT_YES = "YES";
+inline const QString ATT_NO = "NO";
 
 #endif  // DATABASE_H

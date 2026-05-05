@@ -25,7 +25,7 @@ CompileFlags:
 
 Index:
   Background: Build # Build index in background for better performance
-  StandardLibrary: Yes # Index the standard library
+  StandardLibrary: true # Index the standard library
 
 InlayHints: # Visual hints in the editor
   Enabled: true
@@ -58,16 +58,17 @@ CompileFlags:
     - "-Wno-unused-parameter" # Keep warnings about unused parameters in C++
     - "-Wno-format-nonliteral"
     - "-mno-direct-extern-access"
-    
+
 Diagnostics:
   Suppress:
     - modernize-use-nullptr
+    - modernize-use-ranges
     - gnu-statement-expression-from-macro-expansion
     - unused-function
     - readability-static-accessed-through-instance
     - unused-includes
     - misc-non-private-member-variables-in-classes
-    
+
   UnusedIncludes: "Strict" # Strict checking for unused includes
   ClangTidy:
     Add:
@@ -81,7 +82,7 @@ Diagnostics:
       - portability-*
       - readability-*
       - security-*
-      
+
     Remove:
       - fuchsia-*
       - google-*

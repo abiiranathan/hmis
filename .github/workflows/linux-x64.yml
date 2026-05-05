@@ -108,7 +108,8 @@ jobs:
             --appdir build/AppDir \
             --executable build/HMIS \
             --desktop-file HMIS.desktop \
-            --icon-file images/logo.png \
+            --icon-file "images/logo.png" \
+            --icon-filename HMIS \
             --plugin qt \
             --output appimage
 

@@ -21,7 +21,7 @@ jobs:
           version: "6.7.0"
           host: "linux"
           target: "desktop"
-          arch: "linux_gcc_64" # Corrected from 'gcc_64' (though both work)
+          arch: "linux_gcc_64"
           cache: true
           modules: "qtcharts"
 
@@ -70,8 +70,7 @@ jobs:
             libxcb-randr0-dev \
             libxcb-render-util0-dev \
             libxkbcommon-dev \
-            libxkbcommon-x11-dev \
-            libfuse2
+            libxkbcommon-x11-dev
 
       - name: Configure CMake
         run: |
@@ -92,18 +91,22 @@ jobs:
           cp icons/favicon.ico build/release/
           cp images/logo.png build/release/HMIS.png
 
-      - name: Deploy Application (linuxdeployqt)
+      - name: Deploy Application (linuxdeploy)
+        env:
+          QMAKE: ${{ env.Qt6_DIR }}/bin/qmake
+          EXTRA_QT_PLUGINS: "iconengines;platformthemes"
         run: |
-          wget -q https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-          chmod +x linuxdeployqt-continuous-x86_64.AppImage
-          ./linuxdeployqt-continuous-x86_64.AppImage \
-            build/release/HMIS \
-            -bundle-non-qt-libs \
-            -qmake="$Qt6_DIR/bin/qmake" \
-            -appimage \
-            -extra-plugins=iconengines,platformthemes \
-            -no-translations \
-            -exclude-libs=libqsqlmimer
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir build/AppDir \
+            --executable build/HMIS \
+            --desktop-file HMIS.desktop \
+            --icon-file images/logo.png \
+            --plugin qt \
+            --output appimage
 
           mv HMIS*.AppImage build/release/deploy/HMIS-${{ steps.version.outputs.version }}-Linux-x64.AppImage
 

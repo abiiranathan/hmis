@@ -3,11 +3,11 @@ name: Qt6 Linux Build and Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -18,12 +18,12 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: '6.7.0'
-          host: 'linux'
-          target: 'desktop'
-          arch: 'linux_gcc_64'  # Corrected from 'gcc_64' (though both work)
+          version: "6.7.0"
+          host: "linux"
+          target: "desktop"
+          arch: "linux_gcc_64" # Corrected from 'gcc_64' (though both work)
           cache: true
-          modules: 'qtcharts'
+          modules: "qtcharts"
 
       - name: Debug Qt6_DIR
         run: |
@@ -83,7 +83,7 @@ jobs:
 
       - name: Create Deployment Directory
         run: |
-            mkdir -p build/release/deploy
+          mkdir -p build/release/deploy
 
       - name: Copy Executable and Desktop Files
         run: |
@@ -122,4 +122,3 @@ jobs:
             build/release/deploy/HMIS_${{ steps.version.outputs.version }}_Linux_x64.tar.gz
           draft: false
           prerelease: false
-
